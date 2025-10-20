@@ -6,6 +6,7 @@ import {
   generateAndPostTweet,
   analyzeTrends,
   generateScheduledContent,
+  replyToTweetsJob,
   checkAndReplyToYouTubeComments,
   fetchYouTubeCommentsForAnalysis,
 } from '@/lib/jobs';
@@ -26,6 +27,7 @@ import { triggerJobSchema } from '@/lib/validations';
  * - generate-scheduled-content
  * - analyze-trends
  * - ai-tweet-generation
+ * - reply-to-tweets
  * - check-youtube-comments
  * - fetch-youtube-comments-analysis
  */
@@ -37,6 +39,7 @@ const availableJobs: Record<string, () => Promise<void>> = {
   'generate-scheduled-content': generateScheduledContent,
   'analyze-trends': analyzeTrends,
   'ai-tweet-generation': generateAndPostTweet,
+  'reply-to-tweets': replyToTweetsJob,
   'check-youtube-comments': checkAndReplyToYouTubeComments,
   'fetch-youtube-comments-analysis': fetchYouTubeCommentsForAnalysis,
 };

@@ -4,7 +4,7 @@
  * Import endpoints individually or use them all from here
  */
 
-export { searchTwitter } from './search';
+export { searchTwitter, type Tweet, type SearchParams, type SearchResponse } from './search';
 
 // Add more Twitter endpoints here as you provide them:
 // export { postTweet } from './post-tweet';

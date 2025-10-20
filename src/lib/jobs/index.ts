@@ -1,6 +1,7 @@
 import { scheduler, ScheduledJob } from '../scheduler';
 import { exampleEvery5Minutes, exampleHourly, exampleDaily } from './example';
 import { generateAndPostTweet, analyzeTrends, generateScheduledContent } from './twitter-ai';
+import { replyToTweetsJob } from './twitter-reply';
 import { checkAndReplyToYouTubeComments, trackYouTubeVideo, fetchYouTubeCommentsForAnalysis } from './youtube';
 
 /**
@@ -57,6 +58,12 @@ const jobs: ScheduledJob[] = [
     task: generateAndPostTweet,
     enabled: false, // Enable this to generate and post tweets (WARNING: will post to Twitter!)
   },
+  {
+    name: 'reply-to-tweets',
+    schedule: '0 */2 * * *', // Every 2 hours
+    task: replyToTweetsJob,
+    enabled: false, // Enable this to automatically reply to tweets (WARNING: will post replies to Twitter!)
+  },
 
   // YouTube jobs (disabled by default - enable when ready)
   {
@@ -105,6 +112,7 @@ export {
   generateAndPostTweet,
   analyzeTrends,
   generateScheduledContent,
+  replyToTweetsJob,
   checkAndReplyToYouTubeComments,
   trackYouTubeVideo,
   fetchYouTubeCommentsForAnalysis,
