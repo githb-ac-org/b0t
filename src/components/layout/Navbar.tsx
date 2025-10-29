@@ -11,7 +11,6 @@ const navigation = [
   { name: 'Instagram', href: '/instagram' },
   { name: 'Activity', href: '/dashboard/activity' },
   { name: 'Limits', href: '/dashboard/limits' },
-  { name: 'Test', href: '/dashboard/test-replies' },
   { name: 'Settings', href: '/settings' },
 ];
 

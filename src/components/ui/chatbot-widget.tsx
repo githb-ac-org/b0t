@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
 const SUGGESTED_QUESTIONS = [
   'What is Social Cat?',
@@ -97,6 +98,7 @@ const StreamingMarkdown = ({ content, isStreaming }: { content: string; isStream
 };
 
 export function ChatbotWidget() {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -323,6 +325,15 @@ export function ChatbotWidget() {
       setIsLoading(false);
     }
   };
+
+  // Don't render chat widget if user is not authenticated
+  if (status === 'loading') {
+    return null; // Still loading, don't show anything
+  }
+
+  if (!session) {
+    return null; // Not authenticated, hide the widget
+  }
 
   return (
     <>

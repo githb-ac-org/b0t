@@ -192,7 +192,7 @@ export async function getSupportedCountries(): Promise<Country[]> {
 
 /**
  * Helper: Get a summary of trending news for AI context
- * Returns a formatted string with top news headlines and excerpts
+ * Returns a formatted string with the selected article's details
  * Also returns the selected article for tracking
  */
 export async function getNewsSummaryForAI(params?: {
@@ -214,14 +214,11 @@ export async function getNewsSummaryForAI(params?: {
   // Use the first (most trending) article as the main one
   const selectedArticle = articles[0];
 
-  const summary = articles
-    .map((article, index) => {
-      return `${index + 1}. ${article.title}\n   ${article.excerpt}\n   Source: ${article.publisher.name} | ${article.date}`;
-    })
-    .join('\n\n');
+  // Only include the selected article in the summary to avoid mixing multiple articles
+  const summary = `Title: ${selectedArticle.title}\n\nExcerpt: ${selectedArticle.excerpt}\n\nSource: ${selectedArticle.publisher.name}\nDate: ${selectedArticle.date}`;
 
   return {
-    summary: `Latest trending news:\n\n${summary}`,
+    summary: `Latest trending news article:\n\n${summary}`,
     selectedArticle,
   };
 }
