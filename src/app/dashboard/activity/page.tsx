@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { TableSkeleton } from '@/components/ui/card-skeleton';
 import { AlertCircle, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import {
   useReactTable,
@@ -157,9 +158,7 @@ export default function ActivityPage() {
         {/* Activity Table */}
         <div className="animate-slide-up">
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-secondary">
-              <Clock className="h-5 w-5 animate-pulse" />
-            </div>
+            <TableSkeleton rows={10} />
           ) : logs.length === 0 ? (
             <div className="text-center py-12 text-secondary space-y-1">
               <Clock className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -167,7 +166,7 @@ export default function ActivityPage() {
               <p className="text-xs opacity-60">Enable workflows to see activity here</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Table */}
               <div className="border border-border rounded-lg overflow-hidden bg-surface">
                 <table className="w-full">

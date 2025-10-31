@@ -8,7 +8,7 @@ import { Twitter, Youtube, Instagram } from 'lucide-react';
 export default function SocialMediaPage() {
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-4">
         {/* Platform Tabs */}
         <Tabs defaultValue="twitter" className="w-full animate-slide-up">
           <TabsList className="grid w-full grid-cols-3">
@@ -27,8 +27,8 @@ export default function SocialMediaPage() {
           </TabsList>
 
           {/* Twitter Tab */}
-          <TabsContent value="twitter" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+          <TabsContent value="twitter" className="space-y-3">
+            <div className="grid grid-cols-3 gap-3">
               <WorkflowTile
                 title="Post Threads"
                 description="Create and post engaging Twitter threads automatically with AI-powered content generation from trending news"
@@ -69,8 +69,8 @@ Goal: Have a real conversation, not broadcast content."
           </TabsContent>
 
           {/* YouTube Tab */}
-          <TabsContent value="youtube" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+          <TabsContent value="youtube" className="space-y-3">
+            <div className="grid grid-cols-3 gap-3">
               <WorkflowTile
                 title="Reply to Comments"
                 description="Automatically respond to YouTube video comments with helpful, engaging replies that build community"
@@ -90,8 +90,8 @@ Goal: Have a real conversation, not broadcast content."
           </TabsContent>
 
           {/* Instagram Tab */}
-          <TabsContent value="instagram" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+          <TabsContent value="instagram" className="space-y-3">
+            <div className="grid grid-cols-3 gap-3">
               <WorkflowTile
                 title="Reply to Comments"
                 description="Engage with your Instagram community by automatically responding to post comments with authentic, positive replies"

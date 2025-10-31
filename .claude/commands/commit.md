@@ -1,25 +1,17 @@
 ---
-name: commit
-description: Run checks, commit with AI message, and push
+description: Create a clear, human-readable git commit
 ---
 
-1. Run quality checks:
-   ```bash
-   npm run lint
-   npx tsc --noEmit
-   ```
-   Fix ALL errors before continuing.
+Analyze the current git changes and create a commit with a clear, concise message.
 
-2. Review changes: `git status` and `git diff`
+Requirements:
+- Run `git status` and `git diff --staged` (or `git diff` if nothing staged)
+- Write a commit message that's human-readable and to the point
+- Format: Start with a brief summary (50 chars max), then detailed explanation if needed
+- Focus on WHAT changed and WHY, not HOW
+- Use present tense ("Add feature" not "Added feature")
+- Be specific and clear - avoid vague terms like "fix stuff" or "update code"
 
-3. Generate commit message:
-   - Start with verb (Add/Update/Fix/Remove/Refactor)
-   - Be specific and concise
-   - Focus on "why" not "what"
+After drafting the message, create the commit using `git commit -m "message"`.
 
-4. Commit and push:
-   ```bash
-   git add -A
-   git commit -m "your generated message"
-   git push
-   ```
+If nothing is staged, ask if I should stage all changes first.

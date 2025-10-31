@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Loader2, CheckCircle2, XCircle, Play } from 'lucide-react';
+import { StatCardSkeleton } from '@/components/ui/card-skeleton';
+import { CheckCircle2, XCircle, Play } from 'lucide-react';
 import { AnimatedCounter } from '@/components/ui/animated-counter';
 import { isMilestone, fireMilestoneConfetti } from '@/lib/confetti';
 
@@ -51,8 +52,22 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="p-6 flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-6 w-6 animate-spin text-secondary" />
+        <div className="p-6 space-y-4">
+          {/* Main Stats Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </div>
+
+          {/* System Info Skeleton */}
+          <div className="space-y-3">
+            <div className="h-6 w-24 bg-gray-alpha-200 animate-pulse rounded" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -66,9 +81,9 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-4">
         {/* Main Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Successful Runs */}
           <Card className="transition-all border-l-4 border-l-green-500 animate-slide-up">
             <CardHeader className="pb-3">
@@ -124,9 +139,9 @@ export default function DashboardPage() {
         </div>
 
         {/* System Info */}
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-3 animate-fade-in">
           <h2 className="section-title tracking-tight">System</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Card className="transition-all">
               <CardContent className="pt-4">
                 <div className="space-y-1">

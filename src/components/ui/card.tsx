@@ -10,7 +10,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
         className
       )}
     >
-      <div data-slot="card" className="flex flex-col gap-4">
+      <div data-slot="card" className="flex flex-col gap-3">
         {props.children}
       </div>
     </div>

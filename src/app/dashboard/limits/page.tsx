@@ -10,6 +10,8 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { TableSkeleton } from '@/components/ui/card-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, ArrowUpDown, Zap, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -359,9 +361,28 @@ export default function LimitsPage() {
     return (
       <DashboardLayout>
         <div className="p-6 space-y-4">
-          <div className="space-y-1">
-            <h1 className="font-black text-2xl tracking-tight">API Limits</h1>
-            <p className="text-sm text-secondary">Loading...</p>
+          {/* Tier Selector Skeleton */}
+          <div className="flex items-start justify-end gap-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-48" />
+            </div>
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <TableSkeleton rows={8} />
+          </div>
+
+          {/* Info Footer Skeleton */}
+          <div className="flex items-start gap-2 px-1">
+            <Skeleton className="h-3.5 w-3.5 rounded" />
+            <Skeleton className="h-3 w-full" />
           </div>
         </div>
       </DashboardLayout>
@@ -394,7 +415,7 @@ export default function LimitsPage() {
         </div>
 
         {/* Twitter Limits Table */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm">
             <Twitter className="h-4 w-4 text-accent" />
             <span className="font-medium">Twitter API Limits</span>

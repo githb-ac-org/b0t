@@ -261,7 +261,7 @@
   .material-small > * {
     background: var(--gray-100);
     border-radius: var(--radius);
-    padding: 1.5rem; /* 24px padding all around */
+    padding: 1rem; /* 16px padding - Vercel style */
     min-height: 100%;
   }
 

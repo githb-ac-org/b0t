@@ -2,6 +2,8 @@
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { PlatformCardSkeleton } from '@/components/ui/card-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Twitter, Youtube, Instagram, Check, X, Loader2, Cpu } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -272,9 +274,43 @@ export default function SettingsPage() {
     }
   };
 
+  // Show skeleton loader while waiting for initial data
+  const isLoading = (twitterLoading && youtubeLoading && modelLoading);
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="p-6 space-y-4">
+          {/* AI Model Selection Skeleton */}
+          <Card className="border-border bg-surface">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-[280px]" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Platform Cards Skeleton */}
+          <div className="grid grid-cols-3 gap-3">
+            <PlatformCardSkeleton />
+            <PlatformCardSkeleton />
+            <PlatformCardSkeleton />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-4">
 
         {/* AI Model Selection */}
         <Card className="border-border bg-surface">
@@ -291,10 +327,10 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex items-center gap-2 min-w-[280px]">
-                {modelLoading ? (
+                {modelSaving ? (
                   <div className="flex items-center gap-2 h-8 px-3 text-xs text-secondary">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading...
+                    Saving...
                   </div>
                 ) : (
                   <>
@@ -321,7 +357,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Platform Connections - One Row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {/* Twitter */}
           <Card className="border-border bg-surface">
             <CardHeader className="pb-3">

@@ -43,7 +43,7 @@ export function Navbar() {
               data-active={isActive}
               className={`
                 relative inline-block select-none px-3 py-4 no-underline transition-colors duration-200 text-14
-                ${isActive ? 'text-gray-1000' : 'text-gray-900 hover:text-gray-1000'}
+                ${isActive ? 'text-gray-1000' : 'text-gray-700 hover:text-gray-900'}
               `}
               style={{ outlineOffset: '-6px', lineHeight: '0.875rem' }}
             >

@@ -8,7 +8,7 @@ import { FileText } from 'lucide-react';
 export default function ContentPage() {
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-4">
         {/* Platform Tabs */}
         <Tabs defaultValue="wordpress" className="w-full animate-slide-up">
           <TabsList>
@@ -19,8 +19,8 @@ export default function ContentPage() {
           </TabsList>
 
           {/* WordPress Tab */}
-          <TabsContent value="wordpress" className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+          <TabsContent value="wordpress" className="space-y-3">
+            <div className="grid grid-cols-3 gap-3">
               <WorkflowTile
                 title="Auto-Blog"
                 description="Automatically research trending news and generate comprehensive blog posts with AI-powered content creation"
