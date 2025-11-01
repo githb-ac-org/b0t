@@ -2,9 +2,9 @@
 // EXTERNAL MODULES - Reusable library wrappers (like n8n nodes)
 // ============================================================================
 import { createPipeline } from '../Pipeline';
-import { searchTwitter, type Tweet } from '@/lib/rapidapi/twitter';
-import { replyToTweet } from '@/lib/twitter';
-import { generateTweetReply } from '@/lib/openai';
+import { searchTwitter, type Tweet } from '@/modules/external-apis/rapidapi/twitter';
+import { replyToTweet } from '@/modules/social/twitter';
+import { generateTweetReply } from '@/modules/ai/openai';
 import { logger } from '@/lib/logger';
 import { db, useSQLite } from '@/lib/db';
 import { tweetRepliesTableSQLite, tweetRepliesTablePostgres } from '@/lib/schema';

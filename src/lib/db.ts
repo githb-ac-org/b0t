@@ -13,6 +13,7 @@ const useSQLite = !databaseUrl;
 let db: ReturnType<typeof drizzleSQLite> | ReturnType<typeof drizzlePostgres>;
 let sqliteDb: ReturnType<typeof drizzleSQLite> | null = null;
 let postgresDb: ReturnType<typeof drizzlePostgres> | null = null;
+let sqliteClient: Database.Database | null = null;
 
 if (useSQLite) {
   // SQLite configuration for local development
@@ -26,6 +27,7 @@ if (useSQLite) {
   // Set busy timeout to 5 seconds to handle concurrent access
   sqlite.pragma('busy_timeout = 5000');
 
+  sqliteClient = sqlite;
   sqliteDb = drizzleSQLite(sqlite);
   db = sqliteDb;
 } else {
@@ -41,4 +43,4 @@ if (useSQLite) {
   db = postgresDb;
 }
 
-export { db, useSQLite, sqliteDb, postgresDb };
+export { db, useSQLite, sqliteDb, postgresDb, sqliteClient };

@@ -560,3 +560,93 @@ export type WordPressPost = typeof wordpressPostsTableSQLite.$inferSelect;
 export type NewWordPressPost = typeof wordpressPostsTableSQLite.$inferInsert;
 export type WordPressSettings = typeof wordpressSettingsTableSQLite.$inferSelect;
 export type NewWordPressSettings = typeof wordpressSettingsTableSQLite.$inferInsert;
+
+// LLM-generated workflows table for SQLite
+export const workflowsTableSQLite = sqliteTable('workflows', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  name: text('name').notNull(),
+  description: text('description'),
+
+  // User's original prompt
+  prompt: text('prompt').notNull(),
+
+  // LLM-generated workflow configuration
+  config: text('config', { mode: 'json' }).notNull().$type<{
+    steps: Array<{
+      id: string;
+      module: string; // e.g., 'communication.email.sendEmail'
+      inputs: Record<string, unknown>;
+      outputAs?: string; // Variable name for next steps
+    }>;
+  }>(),
+
+  // Trigger configuration
+  trigger: text('trigger', { mode: 'json' }).notNull().$type<{
+    type: 'cron' | 'manual' | 'webhook' | 'telegram' | 'discord' | 'chat';
+    config: Record<string, unknown>;
+  }>(),
+
+  status: text('status').notNull().default('draft'), // draft | active | paused | error
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  lastRun: integer('last_run', { mode: 'timestamp' }),
+  lastRunStatus: text('last_run_status'), // success | error
+  lastRunError: text('last_run_error'),
+  runCount: integer('run_count').notNull().default(0),
+}, (table) => ({
+  userIdIdx: sqliteIndex('workflows_user_id_idx').on(table.userId),
+  statusIdx: sqliteIndex('workflows_status_idx').on(table.status),
+  triggerTypeIdx: sqliteIndex('workflows_trigger_type_idx').on(sql`json_extract(${table.trigger}, '$.type')`),
+}));
+
+// Workflow run history table for SQLite
+export const workflowRunsTableSQLite = sqliteTable('workflow_runs', {
+  id: text('id').primaryKey(),
+  workflowId: text('workflow_id').notNull(),
+  userId: text('user_id').notNull(),
+
+  status: text('status').notNull(), // running | success | error
+  triggerType: text('trigger_type').notNull(), // cron | manual | webhook | etc
+  triggerData: text('trigger_data', { mode: 'json' }),
+
+  // Execution details
+  startedAt: integer('started_at', { mode: 'timestamp' }).notNull(),
+  completedAt: integer('completed_at', { mode: 'timestamp' }),
+  duration: integer('duration'), // milliseconds
+
+  // Results
+  output: text('output', { mode: 'json' }),
+  error: text('error'),
+  errorStep: text('error_step'),
+}, (table) => ({
+  workflowIdIdx: sqliteIndex('workflow_runs_workflow_id_idx').on(table.workflowId),
+  userIdIdx: sqliteIndex('workflow_runs_user_id_idx').on(table.userId),
+  statusIdx: sqliteIndex('workflow_runs_status_idx').on(table.status),
+  startedAtIdx: sqliteIndex('workflow_runs_started_at_idx').on(table.startedAt),
+}));
+
+// User credentials table for SQLite (encrypted API keys, tokens, secrets)
+export const userCredentialsTableSQLite = sqliteTable('user_credentials', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  platform: text('platform').notNull(), // openai, anthropic, stripe, custom
+  name: text('name').notNull(), // User-friendly name (e.g., "My OpenAI Key", "Production Stripe")
+  encryptedValue: text('encrypted_value').notNull(), // AES-256 encrypted credential
+  type: text('type').notNull(), // api_key, token, secret, connection_string
+  metadata: text('metadata', { mode: 'json' }).$type<Record<string, unknown>>(), // Extra info (e.g., rate limits, environment)
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
+  lastUsed: integer('last_used', { mode: 'timestamp' }),
+}, (table) => ({
+  userIdIdx: sqliteIndex('user_credentials_user_id_idx').on(table.userId),
+  platformIdx: sqliteIndex('user_credentials_platform_idx').on(table.platform),
+  userPlatformIdx: sqliteIndex('user_credentials_user_platform_idx').on(table.userId, table.platform),
+}));
+
+export type Workflow = typeof workflowsTableSQLite.$inferSelect;
+export type NewWorkflow = typeof workflowsTableSQLite.$inferInsert;
+export type WorkflowRun = typeof workflowRunsTableSQLite.$inferSelect;
+export type NewWorkflowRun = typeof workflowRunsTableSQLite.$inferInsert;
+export type UserCredential = typeof userCredentialsTableSQLite.$inferSelect;
+export type NewUserCredential = typeof userCredentialsTableSQLite.$inferInsert;

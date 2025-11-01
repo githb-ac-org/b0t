@@ -1,42 +1,42 @@
 # b0t
 
-A visual automation platform for building custom workflows. Connect APIs, services, and platforms to create powerful automations without writing code.
+An AI-powered workflow automation platform. Users describe automations in natural language, and AI generates and executes workflows using composable modules.
 
 ## Product Vision
 
-b0t is a workflow automation builder that lets users create custom automation pipelines through a visual interface. Think Zapier/n8n meets Temporal - users can:
+b0t is an LLM-first workflow automation platform where users create automations by chatting with AI. No coding, no visual editors—just describe what you want automated:
 
-- Build multi-step workflows visually
-- Connect to any API or service
-- Use AI for intelligent automation
-- Schedule jobs and handle retries
-- Monitor workflow execution in real-time
+- **LLM-generated workflows** - AI writes workflow configurations from user prompts
+- **Modular architecture** - 100+ pre-built modules (APIs, databases, social media, AI, etc.)
+- **Multiple triggers** - Cron schedules, webhooks, Telegram/Discord bots, manual execution
+- **Production-ready** - Circuit breakers, retries, rate limiting, structured logging
+- **Self-hosted or cloud** - Run on your infrastructure or use hosted version
 
 **Core Philosophy:**
-- User-built automations (not pre-defined templates)
-- Visual workflow builder with node-based editor
-- First-class AI integration for intelligent decisions
-- Production-ready reliability (circuit breakers, retries, observability)
-- Self-hosted or cloud deployment
+- AI generates workflows, humans supervise
+- Composable modules (src/modules/*) as building blocks
+- Simple chat interface, powerful automation capabilities
+- Production-grade reliability and observability
 
 ## Current State
 
-The codebase currently has pre-built automations organized by category:
+The system is organized around **composable modules** in `src/modules/`:
 
-**Social Media:** Twitter, YouTube, Instagram
-**Content:** WordPress blogging
+**Communication:** Slack, Discord, Telegram, Email (Resend)
+**Social Media:** Twitter, YouTube, Instagram, Reddit, GitHub
+**Data:** MongoDB, MySQL, PostgreSQL, Notion, Google Sheets, Airtable
+**AI:** OpenAI, Anthropic Claude
+**Utilities:** HTTP, File System, CSV, Image Processing, PDF, Web Scraping, RSS, XML, Encryption, Compression
+**Payments:** Stripe
+**Productivity:** Google Calendar
 
-These serve as:
-- Reference implementations for common use cases
-- Starting templates users can customize
-- Examples of workflow patterns
-- Demonstrations of category-based organization
+**Legacy pre-built workflows** exist in the codebase as examples but will be migrated to the LLM-generated approach.
 
 **Next Steps:**
-- Build visual workflow editor (node-based UI)
-- Create workflow execution engine
-- Add connector/integration system
-- Migrate existing automations to new system
+- Build LLM workflow generation system
+- Create workflow execution engine with trigger support
+- Add module documentation for AI context
+- Build simple chat interface for workflow creation
 
 ## Project Structure
 
@@ -47,32 +47,36 @@ src/
   │   │   ├── auth/       # NextAuth.js authentication
   │   │   ├── workflows/  # Workflow execution & management
   │   │   ├── jobs/       # Job control & triggering
-  │   │   ├── services/   # Service status checks
-  │   │   ├── connectors/ # Integration configs
+  │   │   ├── webhooks/   # Webhook triggers
   │   │   └── scheduler/  # Cron scheduling
   │   ├── dashboard/      # Main dashboard
-  │   ├── workflows/      # Workflow builder & management (coming soon)
-  │   ├── social-media/   # Social media automations (Twitter, YouTube, Instagram)
-  │   ├── content/        # Content creation automations (WordPress)
+  │   ├── workflows/      # Workflow chat interface & management
+  │   ├── social-media/   # Legacy: Pre-built automations (being migrated)
+  │   ├── content/        # Legacy: Content automations (being migrated)
   │   ├── setup/          # Initial onboarding
-  │   └── settings/       # User settings
+  │   └── settings/       # User settings & credentials
   ├── components/         # React components
   │   ├── ui/            # Shadcn/ui components
   │   ├── ai-elements/   # AI streaming UI
-  │   ├── automation/    # Automation controls
-  │   ├── workflow/      # Workflow builder components
+  │   ├── workflow/      # Workflow chat & management UI
   │   ├── dashboard/     # Dashboard widgets
   │   └── layout/        # Navbar, layouts
+  ├── modules/           # ⭐ Composable automation modules
+  │   ├── communication/ # Slack, Discord, Telegram, Email
+  │   ├── social/        # Twitter, Reddit, YouTube, Instagram, GitHub
+  │   ├── data/          # Databases (MongoDB, PostgreSQL, MySQL, etc.)
+  │   ├── ai/            # OpenAI, Anthropic
+  │   ├── utilities/     # HTTP, Files, CSV, Images, Encryption, etc.
+  │   ├── payments/      # Stripe
+  │   └── productivity/  # Google Calendar
   ├── lib/               # Core business logic
+  │   ├── workflows/     # Workflow execution engine & LLM generator
   │   ├── jobs/          # BullMQ & cron jobs
-  │   ├── workflows/     # Workflow execution engine
-  │   ├── connectors/    # API integrations
-  │   ├── config/        # System configs
   │   ├── schema.ts      # Drizzle ORM models
   │   ├── db.ts          # Database connection
   │   ├── auth.ts        # Authentication
-  │   ├── scheduler.ts   # Job scheduling
-  │   └── [platform].ts  # Platform API clients
+  │   ├── logger.ts      # Structured logging
+  │   └── [platform].ts  # Legacy platform API clients
 docs/                    # Setup guides
 drizzle/                 # Database migrations
 ```
@@ -82,15 +86,17 @@ drizzle/                 # Database migrations
 **Keep code organized and modularized:**
 - API routes → `/app/api`, one file per endpoint
 - Components → `/components/[category]`, one component per file
-- Business logic → `/lib`, grouped by domain (jobs, workflows, connectors)
+- **Modules** → `/src/modules/[category]/[module].ts` - Self-contained, composable functions
+- Business logic → `/lib`, grouped by domain (workflows, jobs, auth)
 - Database models → `/lib/schema.ts`
 - Tests → Co-located with code as `*.test.ts`
 
-**Modularity principles:**
-- Single responsibility per file
-- Clear, descriptive file names
-- Group related functionality (jobs, workflows, API clients)
-- Avoid monolithic files
+**Module principles:**
+- Each module exports pure functions that take inputs and return outputs
+- Include circuit breakers (opossum), rate limiting (bottleneck), and logging
+- Full TypeScript types with JSDoc documentation
+- Single responsibility - one module per service/API
+- No side effects - modules don't maintain state
 
 ## Code Quality - Zero Tolerance
 
@@ -108,25 +114,43 @@ If changes require server restart (not hot-reloadable):
 2. Read server output/logs
 3. Fix ALL warnings/errors before continuing
 
-## Workflow System Architecture
+## Workflow System
 
-**Workflow Definition:**
-- Node-based visual editor (using @xyflow/react)
-- Nodes represent actions (API calls, conditions, AI processing, etc.)
-- Edges represent data flow between nodes
-- Stored as JSON in database
+Users create workflows by chatting with Claude. Claude generates the workflow JSON, saves it, and executes it.
 
-**Workflow Execution:**
-- BullMQ for reliable job processing
-- Each workflow run is a job
-- Support for retries, timeouts, and error handling
-- Circuit breakers for external APIs
+**When user requests a workflow:**
 
-**Connectors/Integrations:**
-- Modular connector system
-- Each connector provides: auth, actions, triggers
-- Examples: Twitter, OpenAI, Airtable, HTTP requests
-- Users can add custom connectors
+1. Read `src/lib/workflows/module-registry.ts` for available modules (100+ functions)
+2. Generate workflow JSON with `category.module.function` paths (e.g., `utilities.datetime.now`)
+3. Save to database using `sqliteDb.insert(workflowsTableSQLite)`
+4. Execute with `executeWorkflowConfig(workflow.config, userId)`
+5. Show results
+
+**Module path format:** `category.module.function`
+- Categories: `communication`, `social`, `data`, `ai`, `utilities`, `payments`, `productivity`
+- Example: `utilities.datetime.formatDate` → `src/modules/utilities/datetime.ts` → `formatDate()`
+
+**Variable passing:** Use `{{variableName}}` to reference previous step outputs
+- `{{feed.items[0].title}}` - Access nested properties/arrays
+- Steps with `outputAs` save results for later steps
+
+**Workflow Configuration:**
+- Users can configure workflow settings via the unified Settings dialog
+- Settings are organized as collapsible FAQ-style sections:
+  - **Trigger Settings**: Configure cron schedules, bot tokens (Telegram/Discord)
+  - **Step Settings**: Configure AI prompts, models, parameters for each workflow step
+- The system automatically detects configurable fields based on module type:
+  - AI modules: systemPrompt, model, temperature, maxTokens
+  - Social modules: maxResults, filters
+  - Utility modules: maxLength, formatting options
+  - Communication modules: message templates
+- All settings are saved together and applied to the workflow config
+
+**Key files:**
+- `src/lib/workflows/module-registry.ts` - All available modules
+- `src/lib/workflows/executor.ts` - Executes workflows
+- `src/lib/schema.ts` - Database tables (workflows, workflow_runs)
+- `src/components/workflows/workflow-settings-dialog.tsx` - Unified settings configuration UI
 
 ## Tech Stack
 
@@ -134,7 +158,8 @@ If changes require server restart (not hot-reloadable):
 - **PostgreSQL** for production, SQLite for local dev
 - **Drizzle ORM** for database
 - **BullMQ + Redis** for job queue (node-cron fallback)
-- **@xyflow/react** for workflow builder UI
-- **OpenAI SDK** for AI capabilities
+- **OpenAI SDK** + **Anthropic SDK** for LLM workflow generation
 - **NextAuth v5** for authentication
 - **Tailwind CSS** + shadcn/ui for design system
+- **Opossum** (circuit breakers) + **Bottleneck** (rate limiting)
+- **Pino** for structured logging

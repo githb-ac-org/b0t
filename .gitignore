@@ -24,7 +24,7 @@
 *.pem
 
 # database
-data/
+/data/
 
 # debug
 npm-debug.log*

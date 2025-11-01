@@ -12,7 +12,7 @@ import { ReplyHistoryTable } from '@/components/twitter/ReplyHistoryTable';
 import { PostedThreadsHistoryTable } from '@/components/twitter/PostedThreadsHistoryTable';
 import { showTwitter403Error, showTwitter429Error, showApiError, showTwitterSuccess } from '@/lib/toast-helpers';
 import { fireSuccessConfetti } from '@/lib/confetti';
-import { NEWS_TOPICS, NEWS_LANGUAGES, NEWS_COUNTRIES } from '@/lib/rapidapi/newsapi/constants';
+import { NEWS_TOPICS, NEWS_LANGUAGES, NEWS_COUNTRIES } from '@/modules/external-apis/rapidapi/newsapi/constants';
 
 interface CompactAutomationRowProps {
   title: string;

@@ -1,6 +1,6 @@
-import { generateTweet } from '../openai';
+import { generateTweet } from '@/modules/ai/openai';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { postTweet } from '../twitter';
+import { postTweet } from '@/modules/social/twitter';
 import { db, useSQLite } from '../db';
 import { tweetsTableSQLite, tweetsTablePostgres } from '../schema';
 import { logger } from '../logger';

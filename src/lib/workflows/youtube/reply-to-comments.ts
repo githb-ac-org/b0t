@@ -1,6 +1,6 @@
 import { createPipeline } from '../Pipeline';
-import { getRecentVideos, getVideoComments, replyToComment, getOurChannelId } from '@/lib/youtube';
-import { generateTweetReply } from '@/lib/openai'; // Reuse for comment replies
+import { getRecentVideos, getVideoComments, replyToComment, getOurChannelId } from '@/modules/social/youtube';
+import { generateTweetReply } from '@/modules/ai/openai'; // Reuse for comment replies
 import { logger } from '@/lib/logger';
 import { db, useSQLite } from '@/lib/db';
 import {

@@ -1,11 +1,11 @@
 import { createPipeline } from '../Pipeline';
-import { createTweet, createThread } from '@/lib/twitter';
-import { generateTweet, generateThread } from '@/lib/openai';
+import { createTweet, createThread } from '@/modules/social/twitter';
+import { generateTweet, generateThread } from '@/modules/ai/openai';
 import { logger } from '@/lib/logger';
 import { db, useSQLite } from '@/lib/db';
 import { tweetsTableSQLite, tweetsTablePostgres, postedNewsArticlesTableSQLite, postedNewsArticlesTablePostgres } from '@/lib/schema';
 import { trackPost, trackRead } from '@/lib/usage-tracker';
-import { getNewsSummaryForAI, type NewsArticle } from '@/lib/rapidapi/newsapi';
+import { getNewsSummaryForAI, type NewsArticle } from '@/modules/external-apis/rapidapi/newsapi';
 
 /**
  * Post Tweets Workflow

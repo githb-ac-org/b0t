@@ -2,8 +2,8 @@
 // EXTERNAL MODULES - Reusable library wrappers
 // ============================================================================
 import { createPipeline } from '../Pipeline';
-import { getWordPressConfig } from '@/lib/wordpress';
-import { generateBlogPost } from '@/lib/openai';
+import { getWordPressConfig } from '@/modules/content/wordpress';
+import { generateBlogPost } from '@/modules/ai/openai';
 import { logger } from '@/lib/logger';
 import { db, useSQLite } from '@/lib/db';
 import {
@@ -12,7 +12,7 @@ import {
   postedNewsArticlesTableSQLite,
   postedNewsArticlesTablePostgres,
 } from '@/lib/schema';
-import { getNewsSummaryForAI, type NewsArticle } from '@/lib/rapidapi/newsapi';
+import { getNewsSummaryForAI, type NewsArticle } from '@/modules/external-apis/rapidapi/newsapi';
 import { trackRead } from '@/lib/usage-tracker';
 
 /**
@@ -295,7 +295,7 @@ CONTENT:
       const htmlContent = convertToHTML(ctx.generatedContent);
 
       // Import dynamically to avoid circular dependency issues
-      const { createPost } = await import('@/lib/wordpress');
+      const { createPost } = await import('@/modules/content/wordpress');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const post: any = await createPost(wpConfig, {

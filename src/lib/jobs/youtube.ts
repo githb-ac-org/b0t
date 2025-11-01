@@ -1,8 +1,8 @@
-import { getVideoComments, getVideoDetails } from '../youtube';
+import { getVideoComments, getVideoDetails } from '@/modules/social/youtube';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { replyToComment } from '../youtube';
+import { replyToComment } from '@/modules/social/youtube';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { generateTweet } from '../openai';
+import { generateTweet } from '@/modules/ai/openai';
 import { db, useSQLite } from '../db';
 import { youtubeVideosTableSQLite, youtubeCommentsTableSQLite, youtubeVideosTablePostgres, youtubeCommentsTablePostgres } from '../schema';
 import { eq, inArray } from 'drizzle-orm';
