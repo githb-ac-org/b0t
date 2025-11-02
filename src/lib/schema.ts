@@ -650,6 +650,92 @@ export const userCredentialsTableSQLite = sqliteTable('user_credentials', {
   userPlatformIdx: sqliteIndex('user_credentials_user_platform_idx').on(table.userId, table.platform),
 }));
 
+// Workflows table for PostgreSQL
+export const workflowsTablePostgres = pgTable('workflows', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }), // Optional for now, will be required after migration
+  name: varchar('name', { length: 255 }).notNull(),
+  description: pgText('description'),
+
+  // User's original prompt
+  prompt: pgText('prompt').notNull(),
+
+  // LLM-generated workflow configuration
+  config: pgText('config').notNull().$type<{
+    steps: Array<{
+      id: string;
+      module: string; // e.g., 'communication.email.sendEmail'
+      inputs: Record<string, unknown>;
+      outputAs?: string; // Variable name for next steps
+    }>;
+  }>(),
+
+  // Trigger configuration
+  trigger: pgText('trigger').notNull().$type<{
+    type: 'cron' | 'manual' | 'webhook' | 'telegram' | 'discord' | 'chat';
+    config: Record<string, unknown>;
+  }>(),
+
+  status: varchar('status', { length: 50 }).notNull().default('draft'), // draft | active | paused | error
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  lastRun: timestamp('last_run'),
+  lastRunStatus: varchar('last_run_status', { length: 50 }), // success | error
+  lastRunError: pgText('last_run_error'),
+  runCount: pgInteger('run_count').notNull().default(0),
+}, (table) => ({
+  userIdIdx: pgIndex('workflows_user_id_idx').on(table.userId),
+  organizationIdIdx: pgIndex('workflows_organization_id_idx').on(table.organizationId),
+  statusIdx: pgIndex('workflows_status_idx').on(table.status),
+}));
+
+// Workflow run history table for PostgreSQL
+export const workflowRunsTablePostgres = pgTable('workflow_runs', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  workflowId: varchar('workflow_id', { length: 255 }).notNull(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }), // Optional for now, will be required after migration
+
+  status: varchar('status', { length: 50 }).notNull(), // running | success | error
+  triggerType: varchar('trigger_type', { length: 50 }).notNull(), // cron | manual | webhook | etc
+  triggerData: pgText('trigger_data'),
+
+  // Execution details
+  startedAt: timestamp('started_at').notNull(),
+  completedAt: timestamp('completed_at'),
+  duration: pgInteger('duration'), // milliseconds
+
+  // Results
+  output: pgText('output'),
+  error: pgText('error'),
+  errorStep: varchar('error_step', { length: 255 }),
+}, (table) => ({
+  workflowIdIdx: pgIndex('workflow_runs_workflow_id_idx').on(table.workflowId),
+  userIdIdx: pgIndex('workflow_runs_user_id_idx').on(table.userId),
+  organizationIdIdx: pgIndex('workflow_runs_organization_id_idx').on(table.organizationId),
+  statusIdx: pgIndex('workflow_runs_status_idx').on(table.status),
+  startedAtIdx: pgIndex('workflow_runs_started_at_idx').on(table.startedAt),
+}));
+
+// User credentials table for PostgreSQL (encrypted API keys, tokens, secrets)
+export const userCredentialsTablePostgres = pgTable('user_credentials', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  organizationId: varchar('organization_id', { length: 255 }), // Optional for now, will be required after migration
+  platform: varchar('platform', { length: 100 }).notNull(), // openai, anthropic, stripe, custom
+  name: varchar('name', { length: 255 }).notNull(), // User-friendly name (e.g., "My OpenAI Key", "Production Stripe")
+  encryptedValue: pgText('encrypted_value').notNull(), // AES-256 encrypted credential
+  type: varchar('type', { length: 50 }).notNull(), // api_key, token, secret, connection_string
+  metadata: pgText('metadata').$type<Record<string, unknown>>(), // Extra info (e.g., rate limits, environment)
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  lastUsed: timestamp('last_used'),
+}, (table) => ({
+  userIdIdx: pgIndex('user_credentials_user_id_idx').on(table.userId),
+  organizationIdIdx: pgIndex('user_credentials_organization_id_idx').on(table.organizationId),
+  platformIdx: pgIndex('user_credentials_platform_idx').on(table.platform),
+  userPlatformIdx: pgIndex('user_credentials_user_platform_idx').on(table.userId, table.platform),
+}));
+
 // Organizations table for SQLite (multi-tenancy support)
 export const organizationsTableSQLite = sqliteTable('organizations', {
   id: text('id').primaryKey(),
@@ -677,6 +763,41 @@ export const organizationMembersTableSQLite = sqliteTable('organization_members'
   userIdIdx: sqliteIndex('organization_members_user_id_idx').on(table.userId),
   orgUserIdx: sqliteIndex('organization_members_org_user_idx').on(table.organizationId, table.userId),
 }));
+
+// Organization table for PostgreSQL
+export const organizationsTablePostgres = pgTable('organizations', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).notNull().unique(),
+  ownerId: varchar('owner_id', { length: 255 }).notNull(), // User who created/owns the organization
+  plan: varchar('plan', { length: 50 }).notNull().default('free'), // free | pro | enterprise
+  settings: pgText('settings').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  ownerIdIdx: pgIndex('organizations_owner_id_idx').on(table.ownerId),
+  slugIdx: pgIndex('organizations_slug_idx').on(table.slug),
+}));
+
+// Organization members table for PostgreSQL (user-org relationship with roles)
+export const organizationMembersTablePostgres = pgTable('organization_members', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).notNull().default('member'), // owner | admin | member | viewer
+  joinedAt: timestamp('joined_at').notNull().defaultNow(),
+}, (table) => ({
+  orgIdIdx: pgIndex('organization_members_org_id_idx').on(table.organizationId),
+  userIdIdx: pgIndex('organization_members_user_id_idx').on(table.userId),
+  orgUserIdx: pgIndex('organization_members_org_user_idx').on(table.organizationId, table.userId),
+}));
+
+// Conditional exports for new multi-tenancy tables
+export const workflowsTable = useSQLite ? workflowsTableSQLite : workflowsTablePostgres;
+export const workflowRunsTable = useSQLite ? workflowRunsTableSQLite : workflowRunsTablePostgres;
+export const userCredentialsTable = useSQLite ? userCredentialsTableSQLite : userCredentialsTablePostgres;
+export const organizationsTable = useSQLite ? organizationsTableSQLite : organizationsTablePostgres;
+export const organizationMembersTable = useSQLite ? organizationMembersTableSQLite : organizationMembersTablePostgres;
 
 export type Organization = typeof organizationsTableSQLite.$inferSelect;
 export type NewOrganization = typeof organizationsTableSQLite.$inferInsert;

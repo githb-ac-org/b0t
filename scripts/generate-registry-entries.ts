@@ -178,7 +178,7 @@ function extractFunctionsFromFile(filePath: string): FunctionInfo[] {
     const afterExport = content.substring(match.index);
     const signatureMatch = afterExport.match(/\((?:async\s+)?\(([^)]*)\)/);
 
-    let paramNames: string[] = [];
+    const paramNames: string[] = [];
     if (signatureMatch && signatureMatch[1]) {
       const params = signatureMatch[1];
       const paramMatches = params.matchAll(/(\w+)(?:\s*:\s*[^,}]+)?/g);

@@ -1,5 +1,5 @@
 import { db } from './db';
-import { organizationsTableSQLite, organizationMembersTableSQLite, type Organization, type OrganizationMember } from './schema';
+import { organizationsTable, organizationMembersTable, type Organization, type OrganizationMember } from './schema';
 import { eq, and } from 'drizzle-orm';
 import slugify from 'slugify';
 import { randomUUID } from 'crypto';
@@ -23,8 +23,8 @@ export async function createOrganization(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const existing = await (db as any)
     .select()
-    .from(organizationsTableSQLite)
-    .where(eq(organizationsTableSQLite.slug, slug))
+    .from(organizationsTable)
+    .where(eq(organizationsTable.slug, slug))
     .limit(1);
 
   if (existing.length > 0) {
@@ -33,7 +33,7 @@ export async function createOrganization(
 
   // Create organization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (db as any).insert(organizationsTableSQLite).values({
+  await (db as any).insert(organizationsTable).values({
     id,
     name,
     slug,
@@ -43,7 +43,8 @@ export async function createOrganization(
   });
 
   // Add owner as member
-  await (db as any).insert(organizationMembersTableSQLite).values({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (db as any).insert(organizationMembersTable).values({
     id: randomUUID(),
     organizationId: id,
     userId: ownerId,
@@ -53,8 +54,8 @@ export async function createOrganization(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [org] = await (db as any)
     .select()
-    .from(organizationsTableSQLite)
-    .where(eq(organizationsTableSQLite.id, id))
+    .from(organizationsTable)
+    .where(eq(organizationsTable.id, id))
     .limit(1);
 
   return org as Organization;
@@ -67,16 +68,17 @@ export async function getUserOrganizations(userId: string): Promise<Array<Organi
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const memberships = await (db as any)
     .select({
-      organization: organizationsTableSQLite,
-      role: organizationMembersTableSQLite.role,
+      organization: organizationsTable,
+      role: organizationMembersTable.role,
     })
-    .from(organizationMembersTableSQLite)
+    .from(organizationMembersTable)
     .innerJoin(
-      organizationsTableSQLite,
-      eq(organizationMembersTableSQLite.organizationId, organizationsTableSQLite.id)
+      organizationsTable,
+      eq(organizationMembersTable.organizationId, organizationsTable.id)
     )
-    .where(eq(organizationMembersTableSQLite.userId, userId));
+    .where(eq(organizationMembersTable.userId, userId));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return memberships.map((m: any) => ({
     ...m.organization,
     role: m.role as OrganizationRole,
@@ -90,8 +92,8 @@ export async function getOrganizationById(orgId: string): Promise<Organization |
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [org] = await (db as any)
     .select()
-    .from(organizationsTableSQLite)
-    .where(eq(organizationsTableSQLite.id, orgId))
+    .from(organizationsTable)
+    .where(eq(organizationsTable.id, orgId))
     .limit(1);
 
   return org || null;
@@ -107,11 +109,11 @@ export async function getUserRoleInOrganization(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [membership] = await (db as any)
     .select()
-    .from(organizationMembersTableSQLite)
+    .from(organizationMembersTable)
     .where(
       and(
-        eq(organizationMembersTableSQLite.userId, userId),
-        eq(organizationMembersTableSQLite.organizationId, organizationId)
+        eq(organizationMembersTable.userId, userId),
+        eq(organizationMembersTable.organizationId, organizationId)
       )
     )
     .limit(1);
@@ -137,8 +139,8 @@ export async function getOrganizationMembers(organizationId: string): Promise<Ar
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const members = await (db as any)
     .select()
-    .from(organizationMembersTableSQLite)
-    .where(eq(organizationMembersTableSQLite.organizationId, organizationId));
+    .from(organizationMembersTable)
+    .where(eq(organizationMembersTable.organizationId, organizationId));
 
   return members;
 }
@@ -154,7 +156,7 @@ export async function addOrganizationMember(
   const id = randomUUID();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (db as any).insert(organizationMembersTableSQLite).values({
+  await (db as any).insert(organizationMembersTable).values({
     id,
     organizationId,
     userId,
@@ -164,8 +166,8 @@ export async function addOrganizationMember(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [member] = await (db as any)
     .select()
-    .from(organizationMembersTableSQLite)
-    .where(eq(organizationMembersTableSQLite.id, id))
+    .from(organizationMembersTable)
+    .where(eq(organizationMembersTable.id, id))
     .limit(1);
 
   return member as OrganizationMember;
@@ -180,11 +182,11 @@ export async function removeOrganizationMember(
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (db as any)
-    .delete(organizationMembersTableSQLite)
+    .delete(organizationMembersTable)
     .where(
       and(
-        eq(organizationMembersTableSQLite.organizationId, organizationId),
-        eq(organizationMembersTableSQLite.userId, userId)
+        eq(organizationMembersTable.organizationId, organizationId),
+        eq(organizationMembersTable.userId, userId)
       )
     );
 }
@@ -199,12 +201,12 @@ export async function updateOrganizationMemberRole(
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (db as any)
-    .update(organizationMembersTableSQLite)
+    .update(organizationMembersTable)
     .set({ role })
     .where(
       and(
-        eq(organizationMembersTableSQLite.organizationId, organizationId),
-        eq(organizationMembersTableSQLite.userId, userId)
+        eq(organizationMembersTable.organizationId, organizationId),
+        eq(organizationMembersTable.userId, userId)
       )
     );
 }
@@ -216,12 +218,12 @@ export async function deleteOrganization(organizationId: string): Promise<void> 
   // Delete all members first
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (db as any)
-    .delete(organizationMembersTableSQLite)
-    .where(eq(organizationMembersTableSQLite.organizationId, organizationId));
+    .delete(organizationMembersTable)
+    .where(eq(organizationMembersTable.organizationId, organizationId));
 
   // Delete organization
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (db as any)
-    .delete(organizationsTableSQLite)
-    .where(eq(organizationsTableSQLite.id, organizationId));
+    .delete(organizationsTable)
+    .where(eq(organizationsTable.id, organizationId));
 }

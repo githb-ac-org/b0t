@@ -4,17 +4,12 @@ import { OrganizationRole } from './organizations';
 // Define possible actions
 type Actions = 'create' | 'read' | 'update' | 'delete' | 'manage';
 
-// Define subjects (resources)
-type Subjects =
-  | 'Organization'
-  | 'Workflow'
-  | 'Credential'
-  | 'WorkflowRun'
-  | 'OrganizationMember'
-  | 'all';
+// Define subject types (simple string literals)
+type Subjects = 'Organization' | 'Workflow' | 'Credential' | 'WorkflowRun' | 'OrganizationMember' | 'all';
 
-// Ability type
-export type AppAbility = MongoAbility<[Actions, Subjects]>;
+// Ability type - using 'any' for conditions to allow field-based permissions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AppAbility = MongoAbility<[Actions, Subjects], any>;
 
 // User context for permission checks
 export interface UserContext {
@@ -91,6 +86,7 @@ export function can(
   user: UserContext,
   action: Actions,
   subject: Subjects,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field?: any
 ): boolean {
   const ability = defineAbilitiesFor(user);
@@ -104,6 +100,7 @@ export function authorize(
   user: UserContext,
   action: Actions,
   subject: Subjects,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field?: any
 ): void {
   if (!can(user, action, subject, field)) {
