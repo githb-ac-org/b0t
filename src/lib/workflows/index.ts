@@ -1,16 +1,14 @@
 /**
- * Workflow Exports
+ * Workflow System Exports
  *
- * Import workflows from here for use in jobs or API routes
+ * Core workflow execution and management exports
  */
 
-// Twitter workflows
-export { replyToTweetsWorkflow } from './twitter/reply-to-tweets';
-export { postTweetsWorkflow } from './twitter/post-tweets';
+// Workflow execution
+export { executeWorkflowConfig } from './executor';
 
-// YouTube workflows
-export { replyToYouTubeCommentsWorkflow } from './youtube/reply-to-comments';
+// Workflow credentials
+export { analyzeWorkflowCredentials, getPlatformDisplayName, getPlatformIcon } from './analyze-credentials';
 
-// Export Pipeline for custom workflows
-export { Pipeline, createPipeline } from './Pipeline';
-export type { StepResult } from './Pipeline';
+// Import/export
+export * from './import-export';
