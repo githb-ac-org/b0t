@@ -63,22 +63,22 @@ function scanModules(): ModuleStats[] {
 function groupByCategory(modules: ModuleStats[]): CategoryStats[] {
   const categories = new Map<string, CategoryStats>();
 
-  for (const module of modules) {
-    if (!categories.has(module.category)) {
-      categories.set(module.category, {
-        category: module.category,
+  for (const mod of modules) {
+    if (!categories.has(mod.category)) {
+      categories.set(mod.category, {
+        category: mod.category,
         total: 0,
         tested: 0,
         untested: [],
       });
     }
 
-    const stats = categories.get(module.category)!;
+    const stats = categories.get(mod.category)!;
     stats.total++;
-    if (module.hasTest) {
+    if (mod.hasTest) {
       stats.tested++;
     } else {
-      stats.untested.push(module.moduleName);
+      stats.untested.push(mod.moduleName);
     }
   }
 
