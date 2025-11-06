@@ -203,11 +203,17 @@ export async function GET(
       let accounts: Array<{ id: string; accountName: string; isExpired: boolean }> = [];
       let keys: Array<{ id: string; name: string }> = [];
 
-      // Collect accounts and keys from all matching platforms
+      // Collect accounts and keys from all matching platforms (deduplicate by ID)
+      const accountsMap = new Map<string, { id: string; accountName: string; isExpired: boolean }>();
+      const keysMap = new Map<string, { id: string; name: string }>();
+
       for (const platform of platformsToCheck) {
-        accounts = [...accounts, ...(oauthAccounts[platform] || [])];
-        keys = [...keys, ...(apiKeys[platform] || [])];
+        (oauthAccounts[platform] || []).forEach(acc => accountsMap.set(acc.id, acc));
+        (apiKeys[platform] || []).forEach(key => keysMap.set(key.id, key));
       }
+
+      accounts = Array.from(accountsMap.values());
+      keys = Array.from(keysMap.values());
 
       // Determine connection status based on credential type
       let connected = false;

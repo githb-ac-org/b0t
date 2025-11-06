@@ -56,12 +56,15 @@ export function Header() {
       <nav className="flex w-full items-center justify-between">
         {/* Left side - Logo/Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center size-6 rounded-sm bg-foreground text-background font-bold text-sm">
-              b0
-            </div>
-            <span className="text-sm font-medium text-gray-1000 hidden sm:inline">
-              b0t
+          <div className="flex items-center gap-0.5">
+            <span className="text-xl font-bold bg-gradient-to-br from-primary via-blue-500 to-primary bg-clip-text text-transparent">
+              b
+            </span>
+            <span className="text-xl font-bold bg-gradient-to-br from-blue-500 via-primary to-blue-500 bg-clip-text text-transparent">
+              0
+            </span>
+            <span className="text-xl font-bold bg-gradient-to-br from-primary via-blue-500 to-primary bg-clip-text text-transparent">
+              t
             </span>
           </div>
           {/* Timezone Clock */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Workflow, Zap, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 /**
  * Initial app loading screen shown on page refresh
@@ -38,27 +38,112 @@ export function AppLoader() {
         transform: isFadingOut ? 'scale(0.95)' : 'scale(1)',
       }}
     >
-      <div className="flex flex-col items-center gap-6 animate-fade-in">
-        {/* Logo/Icon Area */}
-        <div className="relative">
-          <div className="flex items-center gap-3">
-            {/* Automation Icons with staggered animation */}
-            <div className="animate-bounce-subtle" style={{ animationDelay: '0s' }}>
-              <Workflow className="h-8 w-8 text-foreground/90" />
-            </div>
-            <div className="animate-bounce-subtle" style={{ animationDelay: '0.1s' }}>
-              <Zap className="h-6 w-6 text-accent" />
-            </div>
-          </div>
+      {/* Darkened gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-background" />
+      {/* Animated background blobs */}
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+          x: [0, 50, 0],
+          y: [0, -30, 0]
+        }}
+        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+          x: [0, -40, 0],
+          y: [0, 40, 0]
+        }}
+        transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
+      />
+
+      {/* Main loader content */}
+      <div className="relative z-10 flex flex-col items-center gap-8">
+        {/* b0t text with individual letter animations */}
+        <div className="flex items-center gap-1">
+          <motion.span
+            className="text-9xl font-bold bg-gradient-to-br from-primary via-blue-500 to-primary bg-clip-text text-transparent"
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, -5, 0]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              delay: 0,
+              ease: "easeInOut"
+            }}
+          >
+            b
+          </motion.span>
+          <motion.span
+            className="text-9xl font-bold bg-gradient-to-br from-blue-500 via-primary to-blue-500 bg-clip-text text-transparent"
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, 180, 360]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              delay: 0.2,
+              ease: "easeInOut"
+            }}
+          >
+            0
+          </motion.span>
+          <motion.span
+            className="text-9xl font-bold bg-gradient-to-br from-primary via-blue-500 to-primary bg-clip-text text-transparent"
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 5, 0]
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              delay: 0.4,
+              ease: "easeInOut"
+            }}
+          >
+            t
+          </motion.span>
         </div>
 
-        {/* App Name */}
-        <div className="text-center space-y-2">
-          <h1 className="font-black text-2xl tracking-tight">b0t</h1>
-          <div className="flex items-center gap-2 justify-center">
-            <Loader2 className="h-4 w-4 animate-spin text-accent" />
-            <p className="text-xs text-secondary">Initializing workflows...</p>
-          </div>
+        {/* Pulsing glow effect behind text */}
+        <motion.div
+          className="absolute inset-0 bg-primary/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.2, 0.4, 0.2]
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 2,
+            ease: "easeInOut"
+          }}
+        />
+
+        {/* Audio visualizer bars */}
+        <div className="flex gap-2 items-end h-12">
+          {[0, 0.1, 0.2, 0.3, 0.2, 0.1, 0].map((delay, i) => (
+            <motion.div
+              key={i}
+              className="w-2 bg-gradient-to-t from-primary to-blue-500 rounded-full"
+              animate={{
+                height: ["16px", "48px", "16px"]
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.2,
+                delay,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>

@@ -96,12 +96,12 @@ export function ChatInterface({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden rounded-lg">
       {/* Fullscreen toggle button - positioned absolutely to be next to close button */}
       <button
         type="button"
         onClick={toggleFullscreen}
-        className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-12 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-12 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 z-10"
       >
         {isFullscreen ? (
           <Minimize2 className="h-4 w-4" />
@@ -112,7 +112,8 @@ export function ChatInterface({
       </button>
 
       {/* Header */}
-      <div className="flex items-start px-4 py-3 border-b">
+      <div className="relative flex items-start px-4 py-3 border-b bg-gradient-to-r from-primary/5 via-blue-500/3 to-transparent rounded-t-lg">
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-primary/30 via-blue-400/30 to-transparent" />
         <div>
           <h3 className="font-semibold text-sm">{workflowName}</h3>
           {workflowDescription && (
@@ -136,8 +137,8 @@ export function ChatInterface({
               )}
             >
               {(message.role as string) === 'assistant' && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary via-blue-500 to-primary flex items-center justify-center shadow-sm">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
               )}
 
@@ -145,7 +146,7 @@ export function ChatInterface({
                 className={cn(
                   'max-w-[80%] rounded-2xl px-4 py-3',
                   (message.role as string) === 'user'
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-gradient-to-br from-primary via-blue-500 to-primary text-primary-foreground shadow-sm'
                     : 'bg-muted'
                 )}
               >
@@ -163,8 +164,8 @@ export function ChatInterface({
               </div>
 
               {(message.role as string) === 'user' && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary-foreground" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary via-blue-500 to-primary flex items-center justify-center shadow-sm">
+                  <User className="w-5 h-5 text-white" />
                 </div>
               )}
             </motion.div>
@@ -178,8 +179,8 @@ export function ChatInterface({
             animate={{ opacity: 1, y: 0 }}
             className="flex gap-4"
           >
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-primary" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary via-blue-500 to-primary flex items-center justify-center shadow-sm">
+              <Bot className="w-5 h-5 text-white" />
             </div>
             <div className="bg-muted rounded-2xl px-4 py-3">
               <div className="flex items-center gap-2">
@@ -194,7 +195,7 @@ export function ChatInterface({
       </div>
 
       {/* Input Form */}
-      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
+      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-b-lg">
         <form onSubmit={handleFormSubmit} className="flex gap-3">
           <Textarea
             ref={inputRef}

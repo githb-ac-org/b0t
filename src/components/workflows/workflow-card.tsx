@@ -135,18 +135,17 @@ export function WorkflowCard({ workflow, onDeleted, onExport, onUpdated }: Workf
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeVariant = (status: string): 'gradient-success' | 'gradient-warning' | 'gradient-error' | 'outline' => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
-      case 'draft':
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
+        return 'gradient-success';
       case 'paused':
-        return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300';
+        return 'gradient-warning';
       case 'error':
-        return 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300';
+        return 'gradient-error';
+      case 'draft':
       default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
+        return 'outline';
     }
   };
 
@@ -195,8 +194,10 @@ export function WorkflowCard({ workflow, onDeleted, onExport, onUpdated }: Workf
   const RunIcon = runButtonConfig.icon;
 
   return (
-    <Card className="group relative overflow-hidden rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]">
-      <CardHeader className="space-y-2">
+    <Card className="group relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+      {/* Gradient top border */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+      <CardHeader className="space-y-2 pt-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Switch
@@ -209,7 +210,7 @@ export function WorkflowCard({ workflow, onDeleted, onExport, onUpdated }: Workf
               {(optimisticStatus || workflow.status) === 'active' ? 'Active' : 'Inactive'}
             </span>
           </div>
-          <Badge className={getStatusColor(optimisticStatus || workflow.status)}>
+          <Badge variant={getStatusBadgeVariant(optimisticStatus || workflow.status)}>
             {optimisticStatus || workflow.status}
           </Badge>
         </div>

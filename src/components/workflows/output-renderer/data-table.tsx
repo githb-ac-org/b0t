@@ -42,11 +42,12 @@ export function DataTable({ data, config }: DataTableProps) {
     if (!Array.isArray(data)) {
       const entries = Object.entries(dataObj);
       return (
-        <div className="overflow-x-auto rounded-lg border border-border/50">
-          <table className="w-full text-sm">
+        <div className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+          <table className="w-full text-sm mt-1">
             <tbody>
               {entries.map(([key, value]) => (
-                <tr key={key} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                <tr key={key} className="border-b border-border/30 last:border-0 hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent transition-all duration-200">
                   <td className="p-3 font-medium text-muted-foreground bg-muted/30 w-1/3">
                     {formatLabel(key)}
                   </td>
@@ -151,19 +152,21 @@ export function DataTable({ data, config }: DataTableProps) {
         </div>
       </div>
       <div className="block max-w-full overflow-x-auto">
-        <table className="min-w-full border-collapse">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
+        <div className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+          <table className="min-w-full border-collapse mt-1">
+            <thead>
+              <tr className="border-b border-border/50 bg-background/50">
               {columns.map((col) => (
                 <th key={col.key} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide whitespace-nowrap">
                   {col.label}
                 </th>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, idx) => (
-              <tr key={idx} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row, idx) => (
+                <tr key={idx} className="border-b border-border/30 last:border-0 hover:bg-gradient-to-r hover:from-primary/5 hover:to-transparent transition-all duration-200">
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-3 text-sm align-top">
                     <div className="max-w-xs">
@@ -171,10 +174,11 @@ export function DataTable({ data, config }: DataTableProps) {
                     </div>
                   </td>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

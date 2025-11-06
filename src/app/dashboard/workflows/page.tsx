@@ -178,8 +178,10 @@ export default function WorkflowsPage() {
         {/* Stats Cards */}
         {!loading && workflows.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            {/* Total Workflows */}
+            <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4">
                 <CardTitle className="text-sm font-medium">Total Workflows</CardTitle>
                 <Workflow className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -191,10 +193,14 @@ export default function WorkflowsPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            {/* Active Workflows */}
+            <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-blue-500/30 via-cyan-500/20 to-blue-600/30 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4">
                 <CardTitle className="text-sm font-medium">Active</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500">
+                  <CheckCircle2 className="h-3 w-3 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.active}</div>
@@ -204,10 +210,14 @@ export default function WorkflowsPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            {/* Last Run Success */}
+            <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4">
                 <CardTitle className="text-sm font-medium">Last Run Success</CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500">
+                  <CheckCircle2 className="h-3 w-3 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.successful}</div>
@@ -217,10 +227,14 @@ export default function WorkflowsPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            {/* Last Run Failed */}
+            <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-rose-400 to-red-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4">
                 <CardTitle className="text-sm font-medium">Last Run Failed</CardTitle>
-                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-400 to-rose-500">
+                  <XCircle className="h-3 w-3 text-white" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.failed}</div>

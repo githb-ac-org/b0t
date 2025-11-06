@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Building2, Plus, Users, Calendar, Shield, Trash2, Pencil, UserPlus } from 'lucide-react';
+import { Building2, Plus, Trash2, Pencil, UserPlus } from 'lucide-react';
 import { useClient, type Client } from '@/components/providers/ClientProvider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
@@ -22,15 +22,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ClientMembersDialog } from '@/components/clients/client-members-dialog';
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'active':
-      return 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
-    case 'inactive':
-      return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
-    default:
-      return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
-  }
+const getStatusBadgeVariant = (status: string): 'gradient-success' | 'outline' => {
+  return status === 'active' ? 'gradient-success' : 'outline';
 };
 
 export default function ClientsPage() {
@@ -185,8 +178,8 @@ export default function ClientsPage() {
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="h-8 text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
+              <Button className="bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95 group">
+                <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
                 Add Client
               </Button>
             </DialogTrigger>
@@ -250,9 +243,11 @@ export default function ClientsPage() {
               return (
             <Card
               key={`client-${clientId}`}
-              className="group relative overflow-hidden rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]"
+              className="group relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
             >
-              <CardHeader className="space-y-2">
+              {/* Gradient top border */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+              <CardHeader className="space-y-2 pt-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Switch
@@ -265,7 +260,7 @@ export default function ClientsPage() {
                       {isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
-                  <Badge className={getStatusColor(clientStatus)}>
+                  <Badge variant={getStatusBadgeVariant(clientStatus)}>
                     {clientStatus}
                   </Badge>
                 </div>
@@ -316,16 +311,13 @@ export default function ClientsPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Shield className="h-3.5 w-3.5" />
+                <div className="text-xs text-muted-foreground">
                   <span className="capitalize">{client.plan || 'free'} plan</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
+                <div className="text-xs text-muted-foreground">
                   <span>{client.memberCount || 1} member(s)</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
+                <div className="text-xs text-muted-foreground">
                   <span>
                     Created{' '}
                     {client.createdAt

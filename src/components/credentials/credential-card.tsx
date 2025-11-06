@@ -66,7 +66,8 @@ export function CredentialCard({ credential, onDeleted }: CredentialCardProps) {
   };
 
   return (
-    <Card className="relative overflow-hidden rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300">
+    <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
       <CardHeader className="pb-3 pt-4">
         <div className="flex items-center justify-between">
           <CardTitle className="card-title">{credential.platform}</CardTitle>

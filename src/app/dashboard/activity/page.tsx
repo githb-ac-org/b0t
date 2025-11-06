@@ -26,13 +26,29 @@ interface JobLog {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'success':
-      return <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-green-400 to-emerald-500">
+          <CheckCircle2 className="h-3 w-3 text-white" />
+        </div>
+      );
     case 'error':
-      return <AlertCircle className="h-3.5 w-3.5 text-red-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-red-400 to-rose-500">
+          <AlertCircle className="h-3 w-3 text-white" />
+        </div>
+      );
     case 'warning':
-      return <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-amber-400 to-yellow-500">
+          <AlertTriangle className="h-3 w-3 text-white" />
+        </div>
+      );
     default:
-      return <Clock className="h-3.5 w-3.5 text-gray-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-blue-400 to-cyan-500">
+          <Clock className="h-3 w-3 text-white" />
+        </div>
+      );
   }
 };
 
@@ -206,8 +222,9 @@ export default function ActivityPage() {
           ) : (
             <div className="space-y-3">
               {/* Table */}
-              <div className="border border-border/50 rounded-lg overflow-hidden bg-surface/80 backdrop-blur-sm shadow-sm">
-                <table className="w-full">
+              <div className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+                <table className="w-full mt-1">
                   <thead>
                     {table.getHeaderGroups().map((headerGroup) => (
                       <tr key={headerGroup.id} className="border-b border-border/50 bg-background/50">
@@ -225,10 +242,21 @@ export default function ActivityPage() {
                     ))}
                   </thead>
                   <tbody>
-                    {table.getRowModel().rows.map((row) => (
+                    {table.getRowModel().rows.map((row) => {
+                      const status = row.original.status;
+                      const hoverClass =
+                        status === 'success'
+                          ? 'hover:bg-gradient-to-r hover:from-green-500/5 hover:to-transparent'
+                          : status === 'error'
+                            ? 'hover:bg-gradient-to-r hover:from-red-500/5 hover:to-transparent'
+                            : status === 'warning'
+                              ? 'hover:bg-gradient-to-r hover:from-amber-500/5 hover:to-transparent'
+                              : 'hover:bg-gradient-to-r hover:from-blue-500/5 hover:to-transparent';
+
+                      return (
                       <tr
                         key={row.id}
-                        className="border-b border-border/30 hover:bg-background/30 transition-all duration-200"
+                        className={`border-b border-border/30 transition-all duration-200 ${hoverClass}`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <td key={cell.id} className="px-4 py-3.5">
@@ -236,7 +264,8 @@ export default function ActivityPage() {
                           </td>
                         ))}
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

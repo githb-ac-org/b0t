@@ -21,6 +21,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         invert:
           "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80",
+        gradient: "bg-gradient-to-br from-primary via-blue-500 to-primary text-white shadow-lg hover:shadow-xl hover:scale-[1.02]",
+        "gradient-success": "bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]",
+        "gradient-error": "bg-gradient-to-br from-red-400 to-rose-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

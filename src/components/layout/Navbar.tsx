@@ -52,9 +52,9 @@ export function Navbar() {
           );
         })}
 
-        {/* Animated underline indicator */}
+        {/* Animated underline indicator with gradient */}
         <div
-          className="absolute bottom-0 left-0 h-[2px] bg-foreground transition-transform duration-150 origin-left"
+          className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-primary via-blue-500 to-primary transition-transform duration-150 origin-left"
           style={{
             transform: `translateX(${activeIndicator.left}px) scaleX(${activeIndicator.width > 0 ? activeIndicator.width / 100 : 0})`,
             width: '100px',

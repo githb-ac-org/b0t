@@ -40,13 +40,29 @@ interface WorkflowOutputsDialogProps {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case 'success':
-      return <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-green-400 to-emerald-500">
+          <CheckCircle2 className="h-3 w-3 text-white" />
+        </div>
+      );
     case 'error':
-      return <XCircle className="h-3.5 w-3.5 text-red-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-red-400 to-rose-500">
+          <XCircle className="h-3 w-3 text-white" />
+        </div>
+      );
     case 'running':
-      return <Clock className="h-3.5 w-3.5 text-blue-500 animate-spin" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-blue-400 to-cyan-500">
+          <Clock className="h-3 w-3 text-white animate-spin" />
+        </div>
+      );
     default:
-      return <Clock className="h-3.5 w-3.5 text-gray-500" />;
+      return (
+        <div className="p-1 rounded-md bg-gradient-to-br from-gray-400 to-gray-500">
+          <Clock className="h-3 w-3 text-white" />
+        </div>
+      );
   }
 };
 
@@ -227,8 +243,9 @@ export function WorkflowOutputsDialog({
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto -mx-6 px-6">
-              <div className="border border-border/50 rounded-lg overflow-hidden bg-surface/80 backdrop-blur-sm shadow-sm">
-                <table className="w-full">
+              <div className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-primary/5 via-blue-500/3 to-primary/5 backdrop-blur-sm shadow-sm">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-400 to-primary opacity-80" />
+                <table className="w-full mt-1">
                   <thead className="sticky top-0 bg-background/95 backdrop-blur z-10">
                     {table.getHeaderGroups().map((headerGroup) => (
                       <tr key={headerGroup.id} className="border-b border-border/50">
@@ -246,10 +263,21 @@ export function WorkflowOutputsDialog({
                     ))}
                   </thead>
                   <tbody>
-                    {table.getRowModel().rows.map((row) => (
+                    {table.getRowModel().rows.map((row) => {
+                      const status = row.original.status;
+                      const hoverClass =
+                        status === 'success'
+                          ? 'hover:bg-gradient-to-r hover:from-green-500/5 hover:to-transparent'
+                          : status === 'error'
+                            ? 'hover:bg-gradient-to-r hover:from-red-500/5 hover:to-transparent'
+                            : status === 'running'
+                              ? 'hover:bg-gradient-to-r hover:from-blue-500/5 hover:to-transparent'
+                              : 'hover:bg-gradient-to-r hover:from-gray-500/5 hover:to-transparent';
+
+                      return (
                       <tr
                         key={row.id}
-                        className="border-b border-border/30 hover:bg-background/30 transition-all duration-200"
+                        className={`border-b border-border/30 transition-all duration-200 ${hoverClass}`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <td key={cell.id} className="px-4 py-3.5">
@@ -257,7 +285,8 @@ export function WorkflowOutputsDialog({
                           </td>
                         ))}
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

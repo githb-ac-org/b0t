@@ -104,13 +104,13 @@ export default function DashboardPage() {
         {/* Main Stats Grid */}
         <div className="dashboard-stats grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Successful Runs */}
-          <Card className="relative overflow-hidden rounded-lg rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-slide-up">
+          <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-green-500/30 via-emerald-500/20 to-green-600/30 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 animate-slide-up">
             {/* Status bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />
             <CardHeader className="pb-3 pt-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="p-2 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500">
+                  <CheckCircle2 className="h-4 w-4 text-white" />
                 </div>
                 <CardTitle className="card-title">Successful Runs</CardTitle>
               </div>
@@ -124,13 +124,13 @@ export default function DashboardPage() {
           </Card>
 
           {/* Failed Runs */}
-          <Card className="relative overflow-hidden rounded-lg rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-red-500/30 via-rose-500/20 to-red-600/30 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.1s' }}>
             {/* Status bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-500" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-rose-400 to-red-500" />
             <CardHeader className="pb-3 pt-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                  <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <div className="p-2 rounded-lg bg-gradient-to-br from-red-400 to-rose-500">
+                  <XCircle className="h-4 w-4 text-white" />
                 </div>
                 <CardTitle className="card-title">Failed Runs</CardTitle>
               </div>
@@ -144,13 +144,13 @@ export default function DashboardPage() {
           </Card>
 
           {/* Active Jobs */}
-          <Card className="relative overflow-hidden rounded-lg rounded-lg border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Card className="relative overflow-hidden rounded-lg border-0 bg-gradient-to-br from-blue-500/30 via-cyan-500/20 to-blue-600/30 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.2s' }}>
             {/* Status bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500" />
             <CardHeader className="pb-3 pt-4">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <Play className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500">
+                  <Play className="h-4 w-4 text-white" />
                 </div>
                 <CardTitle className="card-title">Active Jobs</CardTitle>
               </div>

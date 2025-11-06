@@ -38,16 +38,16 @@ interface ClientMembersDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const getRoleBadgeColor = (role: string) => {
+const getRoleBadgeVariant = (role: string): 'gradient-active' | 'gradient-warning' | 'gradient-success' | 'outline' => {
   switch (role) {
     case 'owner':
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
+      return 'gradient-active';
     case 'admin':
-      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+      return 'gradient-warning';
     case 'member':
-      return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+      return 'gradient-success';
     default:
-      return 'bg-gray-100 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300';
+      return 'outline';
   }
 };
 
@@ -230,7 +230,7 @@ export function ClientMembersDialog({ clientId, clientName, open, onOpenChange }
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium truncate">{member.name || member.email || 'Unknown User'}</p>
-                      <Badge className={getRoleBadgeColor(member.role)}>{getRoleDisplayName(member.role)}</Badge>
+                      <Badge variant={getRoleBadgeVariant(member.role)}>{getRoleDisplayName(member.role)}</Badge>
                     </div>
                     {member.email && member.name && (
                       <p className="text-xs text-muted-foreground truncate">{member.email}</p>
