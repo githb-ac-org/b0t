@@ -48,13 +48,13 @@ function validateModulePaths(workflow: WorkflowExport): string[] {
   const errors: string[] = [];
   const registry = getModuleRegistry();
 
-  // Build a set of valid module paths
-  const validPaths = new Set<string>();
+  // Build a map of valid module paths with function details
+  const validPaths = new Map<string, { signature: string }>();
   registry.forEach((category) => {
     category.modules.forEach((module) => {
       module.functions.forEach((fn) => {
         const path = `${category.name.toLowerCase()}.${module.name}.${fn.name}`;
-        validPaths.add(path);
+        validPaths.set(path, { signature: fn.signature });
       });
     });
   });
@@ -67,6 +67,49 @@ function validateModulePaths(workflow: WorkflowExport): string[] {
       );
     }
   });
+
+  return errors;
+}
+
+/**
+ * Deep validation - actually load modules and verify functions exist
+ */
+async function validateModuleFunctions(workflow: WorkflowExport): Promise<string[]> {
+  const errors: string[] = [];
+
+  for (const step of workflow.config.steps) {
+    const [category, moduleName, functionName] = step.module.split('.');
+
+    try {
+      // Construct module path
+      const modulePath = `../src/modules/${category}/${moduleName}`;
+
+      // Dynamically import the module
+      const module = await import(modulePath);
+
+      // Check if function exists
+      if (typeof module[functionName] !== 'function') {
+        errors.push(
+          `Step "${step.id}": Function "${functionName}" not found in module ${category}/${moduleName}`
+        );
+
+        // Show available functions
+        const availableFunctions = Object.keys(module).filter(
+          key => typeof module[key] === 'function'
+        );
+        if (availableFunctions.length > 0) {
+          errors.push(
+            `   Available functions: ${availableFunctions.join(', ')}`
+          );
+        }
+      }
+    } catch (error: any) {
+      // Module doesn't exist
+      errors.push(
+        `Step "${step.id}": Failed to load module ${category}/${moduleName}: ${error?.message || error}`
+      );
+    }
+  }
 
   return errors;
 }
@@ -200,6 +243,13 @@ async function validateWorkflow(workflowJson: string): Promise<void> {
     // Parse JSON
     let workflow: WorkflowExport;
     try {
+      // Check for invalid JSON values like undefined
+      if (workflowJson.includes('undefined')) {
+        console.error('❌ Invalid JSON: Contains "undefined" which is not valid JSON');
+        console.error('💡 Tip: Replace undefined with null, or remove the field entirely');
+        process.exit(1);
+      }
+
       workflow = JSON.parse(workflowJson);
     } catch (error) {
       console.error('❌ Invalid JSON format');
@@ -231,6 +281,20 @@ async function validateWorkflow(workflowJson: string): Promise<void> {
       process.exit(1);
     }
     console.log('✅ All module paths are valid');
+
+    // Deep validation - load actual modules and verify functions
+    console.log('\n🔍 Deep validation - checking if functions actually exist in modules...');
+    const functionErrors = await validateModuleFunctions(workflow);
+    if (functionErrors.length > 0) {
+      console.error('\n❌ Function validation failed:\n');
+      functionErrors.forEach((error) => {
+        console.error(`   • ${error}`);
+      });
+      console.log('\n💡 Tip: The function name in the registry might not match the actual implementation');
+      console.log('   Run: npx tsx scripts/generate-module-registry.ts to sync the registry');
+      process.exit(1);
+    }
+    console.log('✅ All functions verified in actual module files');
 
     // Validate variable references
     console.log('\n🔍 Checking variable references...');

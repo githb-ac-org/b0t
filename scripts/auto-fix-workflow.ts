@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
+import { getModuleRegistry } from '../src/lib/workflows/module-registry';
 
 interface WorkflowStep {
   id: string;
@@ -322,70 +323,23 @@ function fixVariableNameTypos(workflow: Workflow): void {
  * Only converts category.namespace to lowercase, fixes known function name cases
  */
 function fixModulePathCase(workflow: Workflow): void {
-  // Known function name corrections (lowercase -> correct camelCase)
-  const FUNCTION_NAME_CORRECTIONS: Record<string, string> = {
-    // AI SDK
-    'ai.ai-sdk.generatetext': 'ai.ai-sdk.generateText',
-    'ai.ai-sdk.generatejson': 'ai.ai-sdk.generateJSON',
-    'ai.ai-sdk.streamtext': 'ai.ai-sdk.streamText',
-    'ai.ai-sdk.streamobject': 'ai.ai-sdk.streamObject',
+  // Build valid module paths from registry
+  const registry = getModuleRegistry();
+  const validPaths = new Set<string>();
+  const pathVariants = new Map<string, string>(); // lowercase -> correct path
 
-    // Array Utils
-    'utilities.array-utils.ziptoobjects': 'utilities.array-utils.zipToObjects',
-    'utilities.array-utils.sortnumbers': 'utilities.array-utils.sortNumbers',
-    'utilities.array-utils.sortstrings': 'utilities.array-utils.sortStrings',
-    'utilities.array-utils.sortby': 'utilities.array-utils.sortBy',
-    'utilities.array-utils.groupby': 'utilities.array-utils.groupBy',
-    'utilities.array-utils.countby': 'utilities.array-utils.countBy',
-    'utilities.array-utils.filterby': 'utilities.array-utils.filterBy',
-    'utilities.array-utils.findby': 'utilities.array-utils.findBy',
-    'utilities.array-utils.insertat': 'utilities.array-utils.insertAt',
-    'utilities.array-utils.removeat': 'utilities.array-utils.removeAt',
-    'utilities.array-utils.replaceat': 'utilities.array-utils.replaceAt',
-    'utilities.array-utils.isempty': 'utilities.array-utils.isEmpty',
+  registry.forEach((category) => {
+    category.modules.forEach((module) => {
+      module.functions.forEach((fn) => {
+        const correctPath = `${category.name.toLowerCase()}.${module.name}.${fn.name}`;
+        validPaths.add(correctPath);
 
-    // String Utils
-    'utilities.string-utils.capitalizewords': 'utilities.string-utils.capitalizeWords',
-    'utilities.string-utils.charcount': 'utilities.string-utils.charCount',
-    'utilities.string-utils.escapehtml': 'utilities.string-utils.escapeHtml',
-    'utilities.string-utils.extractemails': 'utilities.string-utils.extractEmails',
-    'utilities.string-utils.extracturls': 'utilities.string-utils.extractUrls',
-    'utilities.string-utils.isemail': 'utilities.string-utils.isEmail',
-    'utilities.string-utils.isurl': 'utilities.string-utils.isUrl',
-    'utilities.string-utils.normalizewhitespace': 'utilities.string-utils.normalizeWhitespace',
-    'utilities.string-utils.randomstring': 'utilities.string-utils.randomString',
-    'utilities.string-utils.removeaccents': 'utilities.string-utils.removeAccents',
-    'utilities.string-utils.striphtml': 'utilities.string-utils.stripHtml',
-    'utilities.string-utils.tocamelcase': 'utilities.string-utils.toCamelCase',
-    'utilities.string-utils.tokebabcase': 'utilities.string-utils.toKebabCase',
-    'utilities.string-utils.topascalcase': 'utilities.string-utils.toPascalCase',
-    'utilities.string-utils.tosnakecase': 'utilities.string-utils.toSnakeCase',
-    'utilities.string-utils.toslug': 'utilities.string-utils.toSlug',
-    'utilities.string-utils.truncatewords': 'utilities.string-utils.truncateWords',
-    'utilities.string-utils.wordcount': 'utilities.string-utils.wordCount',
-
-    // JSON Transform - Function name aliases (wrong -> correct)
-    'utilities.json-transform.clonedeep': 'utilities.json-transform.deepClone',
-    'utilities.json-transform.cloneDeep': 'utilities.json-transform.deepClone',
-    'utilities.json-transform.mergedeep': 'utilities.json-transform.deepMerge',
-    'utilities.json-transform.mergeDeep': 'utilities.json-transform.deepMerge',
-    'utilities.json-transform.flattenobject': 'utilities.json-transform.flatten',
-    'utilities.json-transform.flattenObject': 'utilities.json-transform.flatten',
-    'utilities.json-transform.unflattenobject': 'utilities.json-transform.unflatten',
-    'utilities.json-transform.unflattenObject': 'utilities.json-transform.unflatten',
-    'utilities.json-transform.getnestedvalue': 'utilities.json-transform.get',
-    'utilities.json-transform.getNestedValue': 'utilities.json-transform.get',
-    'utilities.json-transform.setnestedvalue': 'utilities.json-transform.set',
-    'utilities.json-transform.setNestedValue': 'utilities.json-transform.set',
-    'utilities.json-transform.deletenestedvalue': 'utilities.json-transform.deleteNestedValue',
-    'utilities.json-transform.mapkeys': 'utilities.json-transform.mapKeys',
-    'utilities.json-transform.mapvalues': 'utilities.json-transform.mapValues',
-    'utilities.json-transform.filterobject': 'utilities.json-transform.filterObject',
-    'utilities.json-transform.parsejson': 'utilities.json-transform.parseJson',
-    'utilities.json-transform.parseJson': 'utilities.json-transform.parseJson',
-    'utilities.json-transform.stringifyjson': 'utilities.json-transform.stringifyJson',
-    'utilities.json-transform.stringifyJson': 'utilities.json-transform.stringifyJson',
-  };
+        // Map lowercase variant to correct path
+        const lowercasePath = correctPath.toLowerCase();
+        pathVariants.set(lowercasePath, correctPath);
+      });
+    });
+  });
 
   for (const step of workflow.config.steps) {
     const originalModule = step.module;
@@ -393,15 +347,16 @@ function fixModulePathCase(workflow: Workflow): void {
 
     if (parts.length !== 3) continue; // Should be category.namespace.function
 
-    // Convert category and namespace to lowercase, preserve function name
-    let correctedModule = `${parts[0].toLowerCase()}.${parts[1].toLowerCase()}.${parts[2]}`;
-
-    // Check for known function name corrections
-    if (FUNCTION_NAME_CORRECTIONS[correctedModule]) {
-      correctedModule = FUNCTION_NAME_CORRECTIONS[correctedModule];
+    // If module already exists in valid paths, no fix needed
+    if (validPaths.has(originalModule)) {
+      continue;
     }
 
-    if (originalModule !== correctedModule) {
+    // Try to find correct path by lowercase matching
+    const lowercaseModule = originalModule.toLowerCase();
+    const correctedModule = pathVariants.get(lowercaseModule);
+
+    if (correctedModule && correctedModule !== originalModule) {
       step.module = correctedModule;
       fixes.push({
         stepId: step.id,
