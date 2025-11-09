@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Force dynamic rendering for all pages to avoid static generation errors
   output: 'standalone',
 
+  // Skip generating 404 and 500 pages during build to prevent Html import errors
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
+  },
+
   // Skip static error page generation during build
   // This prevents build failures from prerendering errors
   typescript: {
@@ -30,6 +35,7 @@ const nextConfig: NextConfig = {
     'utf-8-validate',
     '@node-rs/argon2',
     '@node-rs/bcrypt',
+    'pdf-parse',
   ],
 
   // Configure webpack to ignore native modules and optional dependencies

@@ -85,7 +85,7 @@ function parseFunction(
   if (!node.name) return null;
 
   const functionName = node.name.text;
-  const description = getJSDocDescription(node, sourceFile);
+  const description = getJSDocDescription(node);
   const example = getJSDocExample(node);
 
   // Build parameter list
