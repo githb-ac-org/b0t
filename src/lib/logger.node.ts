@@ -33,34 +33,56 @@ if (enableFileLogs && typeof window === 'undefined') {
   }
 }
 
-// Create custom formatter for development logs
-const devFormatter = (obj: Record<string, unknown>) => {
-  const { msg, ...rest } = obj;
-  const cleanRest = { ...rest };
-  delete cleanRest.time;
-  delete cleanRest.pid;
-  delete cleanRest.hostname;
-  delete cleanRest.level;
-
-  const hasMetadata = Object.keys(cleanRest).length > 0;
-  return hasMetadata ? `${msg}` : msg as string;
-};
-
 // Create logger with multiple streams
 export const createNodeLogger = () => {
   if (isDevelopment) {
-    // Development: Simple console output, JSON logs to files
-    // Use pino's browser mode for clean console output (no worker threads)
+    // Development: Clean console output using custom stream
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Writable } = require('stream');
+
+    const prettyStream = new Writable({
+      write(chunk: Buffer, _encoding: string, callback: () => void) {
+        try {
+          const log = JSON.parse(chunk.toString());
+          const { msg, level, ...metadata } = log;
+          // Remove common pino fields we don't need to display
+          delete metadata.time;
+          delete metadata.pid;
+          delete metadata.hostname;
+
+          // Get level prefix
+          const levelPrefix: Record<number, string> = {
+            10: '🔍', // trace
+            20: '🔍', // debug
+            30: '',   // info - no prefix for cleaner output
+            40: '⚠️',  // warn
+            50: '❌', // error
+            60: '💀', // fatal
+          };
+
+          const prefix = levelPrefix[level as number] || '';
+
+          // Format message
+          let output = prefix ? `${prefix} ${msg}` : msg;
+
+          // Add metadata if present
+          if (Object.keys(metadata).length > 0) {
+            output += ' ' + JSON.stringify(metadata);
+          }
+
+          // Write to stdout (Next.js will capture this)
+          console.log(output);
+        } catch {
+          // If parsing fails, just output as-is
+          console.log(chunk.toString());
+        }
+        callback();
+      }
+    });
+
     return pino({
       level: process.env.LOG_LEVEL || 'info',
-      browser: {
-        asObject: false,
-        write: (obj: object) => {
-          // Custom console output - just the message
-          console.log(devFormatter(obj as Record<string, unknown>));
-        },
-      },
-    });
+    }, prettyStream);
   } else {
     // Production: JSON logs for structured logging
     const streams: pino.StreamEntry[] = [];

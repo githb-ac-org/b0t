@@ -7,6 +7,21 @@ set -e
 
 echo "🚀 Starting development environment..."
 
+# Check if port 3000 is in use and offer to kill it
+if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+    echo "⚠️  Port 3000 is already in use"
+    echo "💡 Kill existing process? (y/n)"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "🔪 Killing process on port 3000..."
+        lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+        sleep 1
+    else
+        echo "⚠️  Next.js will use the next available port (likely 3001)"
+    fi
+fi
+
 # Check if Docker containers are running
 if ! docker compose ps | grep -q "postgres.*running" || ! docker compose ps | grep -q "redis.*running"; then
     echo "⚠️  Docker containers not running. Starting them..."
