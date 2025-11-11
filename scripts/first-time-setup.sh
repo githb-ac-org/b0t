@@ -174,10 +174,10 @@ if [ -z "$ENCRYPTION_KEY" ] || [ "$ENCRYPTION_KEY" == "your-encryption-key-here"
 fi
 
 # Ensure DATABASE_URL and REDIS_URL are set for Docker
-if ! grep -q "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/social_cat_dev" .env.local; then
+if ! grep -q "DATABASE_URL=postgresql://postgres:postgres@localhost:5433/social_cat_dev" .env.local; then
     echo "" >> .env.local
     echo "# Docker Services (auto-configured)" >> .env.local
-    echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/social_cat_dev" >> .env.local
+    echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5433/social_cat_dev" >> .env.local
     echo "REDIS_URL=redis://localhost:6379" >> .env.local
     print_success "Added Docker connection strings to .env.local"
 fi
@@ -245,6 +245,11 @@ npm run db:push --silent || {
 }
 print_success "Database schema created"
 
+echo ""
+echo "Seeding admin user..."
+npm run db:seed --silent
+print_success "Admin user created (admin@b0t.dev / admin)"
+
 # ============================================================================
 # STEP 6: Verify Installation
 # ============================================================================
@@ -291,7 +296,7 @@ echo -e "${GREEN}   Your development environment is ready!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "📊 Services Running:"
-echo "   ✓ PostgreSQL:  localhost:5432"
+echo "   ✓ PostgreSQL:  localhost:5433 (container internal: 5432)"
 echo "   ✓ Redis:       localhost:6379"
 echo ""
 echo "🎯 Next Steps:"
