@@ -592,6 +592,143 @@ export function getModuleRegistry(): ModuleCategory[] {
           ],
         },
         {
+          name: 'gohighlevel',
+          functions: [
+            {
+              name: 'createContact',
+              description: "Create a new contact in GoHighLevel",
+              signature: 'createContact(contactData, options?)',
+              example: "const contact = await createContact({\n  email: 'john@example.com',\n  firstName: 'John',\n  lastName: 'Doe',\n  phone: '+1234567890',\n  tags: ['lead', 'website']\n}, { accessToken: 'your-token', locationId: 'location-id' });",
+            },
+            {
+              name: 'getContact',
+              description: "Get a contact by ID",
+              signature: 'getContact(contactId, options?)',
+              example: "const contact = await getContact('contact-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'updateContact',
+              description: "Update an existing contact",
+              signature: 'updateContact(contactId, contactData, options?)',
+              example: "const contact = await updateContact('contact-id', {\n  firstName: 'Jane',\n  tags: ['customer', 'vip']\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'deleteContact',
+              description: "Delete a contact by ID",
+              signature: 'deleteContact(contactId, options?)',
+              example: "const result = await deleteContact('contact-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'searchContacts',
+              description: "Search contacts by various criteria",
+              signature: 'searchContacts(searchParams, options?)',
+              example: "const contacts = await searchContacts({\n  locationId: 'location-id',\n  query: 'john@example.com',\n  limit: 10\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getConversations',
+              description: "Get all conversations for a contact",
+              signature: 'getConversations(contactId, options?)',
+              example: "const conversations = await getConversations('contact-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'sendMessage',
+              description: "Send a message to a contact (SMS, Email, or WhatsApp)",
+              signature: 'sendMessage(messageData, options?)',
+              example: "// Send SMS\nconst message = await sendMessage({\n  contactId: 'contact-id',\n  type: 'SMS',\n  message: 'Hello from GHL!'\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getMessages',
+              description: "Get all messages from a conversation",
+              signature: 'getMessages(conversationId, options?)',
+              example: "const messages = await getMessages('conversation-id', {\n  accessToken: 'your-token',\n  limit: 50\n});",
+            },
+            {
+              name: 'getCalendars',
+              description: "Get all calendars for a location",
+              signature: 'getCalendars(locationId, options?)',
+              example: "const calendars = await getCalendars('location-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'createAppointment',
+              description: "Create a new appointment",
+              signature: 'createAppointment(appointmentData, options?)',
+              example: "const appointment = await createAppointment({\n  calendarId: 'calendar-id',\n  contactId: 'contact-id',\n  locationId: 'location-id',\n  title: 'Consultation',\n  startTime: '2025-01-15T10:00:00Z',\n  endTime: '2025-01-15T11:00:00Z',\n  appointmentStatus: 'confirmed'\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getAppointment',
+              description: "Get an appointment by ID",
+              signature: 'getAppointment(appointmentId, options?)',
+              example: "const appointment = await getAppointment('appointment-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'updateAppointment',
+              description: "Update an existing appointment",
+              signature: 'updateAppointment(appointmentId, appointmentData, options?)',
+              example: "const appointment = await updateAppointment('appointment-id', {\n  appointmentStatus: 'confirmed',\n  notes: 'Client confirmed attendance'\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getPipelines',
+              description: "Get all sales pipelines for a location",
+              signature: 'getPipelines(locationId, options?)',
+              example: "const pipelines = await getPipelines('location-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'createOpportunity',
+              description: "Create a new sales opportunity",
+              signature: 'createOpportunity(opportunityData, options?)',
+              example: "const opportunity = await createOpportunity({\n  name: 'New Enterprise Deal',\n  pipelineId: 'pipeline-id',\n  pipelineStageId: 'stage-id',\n  contactId: 'contact-id',\n  monetaryValue: 50000,\n  status: 'open'\n}, { accessToken: 'your-token', locationId: 'location-id' });",
+            },
+            {
+              name: 'getOpportunity',
+              description: "Get an opportunity by ID",
+              signature: 'getOpportunity(opportunityId, options?)',
+              example: "const opportunity = await getOpportunity('opportunity-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'updateOpportunity',
+              description: "Update an existing opportunity",
+              signature: 'updateOpportunity(opportunityId, opportunityData, options?)',
+              example: "const opportunity = await updateOpportunity('opportunity-id', {\n  pipelineStageId: 'new-stage-id',\n  monetaryValue: 75000,\n  status: 'won'\n}, { accessToken: 'your-token' });",
+            },
+            {
+              name: 'deleteOpportunity',
+              description: "Delete an opportunity by ID",
+              signature: 'deleteOpportunity(opportunityId, options?)',
+              example: "const result = await deleteOpportunity('opportunity-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getTags',
+              description: "Get all tags for a location",
+              signature: 'getTags(locationId, options?)',
+              example: "const tags = await getTags('location-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'addTagToContact',
+              description: "Add a tag to a contact",
+              signature: 'addTagToContact(contactId, tagId, options?)',
+              example: "const result = await addTagToContact('contact-id', 'tag-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'removeTagFromContact',
+              description: "Remove a tag from a contact",
+              signature: 'removeTagFromContact(contactId, tagId, options?)',
+              example: "const result = await removeTagFromContact('contact-id', 'tag-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getCustomFields',
+              description: "Get all custom fields for a location",
+              signature: 'getCustomFields(locationId, options?)',
+              example: "const fields = await getCustomFields('location-id', { accessToken: 'your-token' });",
+            },
+            {
+              name: 'getLocation',
+              description: "Get location details by ID",
+              signature: 'getLocation(locationId, options?)',
+              example: "const location = await getLocation('location-id', { accessToken: 'your-token' });",
+            },
+          ],
+        },
+        {
           name: 'hellosign',
           functions: [
             {

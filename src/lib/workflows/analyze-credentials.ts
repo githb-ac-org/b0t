@@ -229,6 +229,42 @@ const PLATFORM_CAPABILITIES: Record<string, PlatformCapability> = {
     },
   },
 
+  // GoHighLevel: OAuth 2.0 only (API v2)
+  'gohighlevel': {
+    category: 'oauth',
+    preferredMethod: 'oauth',
+    functionRequirements: {
+      // Contacts
+      'createContact': 'oauth',
+      'getContact': 'oauth',
+      'updateContact': 'oauth',
+      'deleteContact': 'oauth',
+      'searchContacts': 'oauth',
+      // Conversations
+      'getConversations': 'oauth',
+      'sendMessage': 'oauth',
+      'getMessages': 'oauth',
+      // Calendar & Appointments
+      'getCalendars': 'oauth',
+      'createAppointment': 'oauth',
+      'getAppointment': 'oauth',
+      'updateAppointment': 'oauth',
+      // Opportunities
+      'getPipelines': 'oauth',
+      'createOpportunity': 'oauth',
+      'getOpportunity': 'oauth',
+      'updateOpportunity': 'oauth',
+      'deleteOpportunity': 'oauth',
+      // Tags & Custom Fields
+      'getTags': 'oauth',
+      'addTagToContact': 'oauth',
+      'removeTagFromContact': 'oauth',
+      'getCustomFields': 'oauth',
+      // Locations
+      'getLocation': 'oauth',
+    },
+  },
+
   // Slack: Supports Bot Tokens and User OAuth
   'slack': {
     category: 'both',

@@ -570,6 +570,37 @@ export const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
     ]
   },
 
+  gohighlevel: {
+    id: 'gohighlevel',
+    name: 'GoHighLevel (OAuth 2.0)',
+    category: 'Business',
+    fields: [
+      {
+        key: 'access_token',
+        label: 'Access Token',
+        type: 'password',
+        required: true,
+        placeholder: 'eyJ...',
+        description: 'OAuth 2.0 access token from GHL (valid for 24 hours)'
+      },
+      {
+        key: 'refresh_token',
+        label: 'Refresh Token',
+        type: 'password',
+        required: false,
+        description: 'OAuth 2.0 refresh token for automatic token renewal'
+      },
+      {
+        key: 'location_id',
+        label: 'Location ID',
+        type: 'text',
+        required: false,
+        placeholder: 'loc_...',
+        description: 'Default location ID (can be overridden per request)'
+      }
+    ]
+  },
+
   // ============================================
   // PAYMENTS
   // ============================================

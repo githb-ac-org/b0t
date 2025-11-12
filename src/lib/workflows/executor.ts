@@ -673,7 +673,7 @@ async function executeModuleFunction(
  * Stores decrypted credentials to avoid repeated database queries and decryption
  */
 const globalForCredentials = globalThis as typeof globalThis & {
-  _credentialCache?: Map<string, { credentials: Record<string, string>; timestamp: number }>;
+  _credentialCache?: Map<string, { credentials: Record<string, string | Record<string, string>>; timestamp: number }>;
 };
 
 if (!globalForCredentials._credentialCache) {
@@ -689,7 +689,7 @@ const CREDENTIAL_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  *
  * Performance: 3x faster with Redis cache (10-20ms vs 250-600ms DB query)
  */
-export async function loadUserCredentials(userId: string): Promise<Record<string, string>> {
+export async function loadUserCredentials(userId: string): Promise<Record<string, string | Record<string, string>>> {
   // Try Redis cache first (shared across all instances)
   const { getCacheOrCompute, CacheKeys, CacheTTL } = await import('@/lib/cache');
 
@@ -720,7 +720,7 @@ export async function loadUserCredentials(userId: string): Promise<Record<string
  * Internal function: Load credentials directly from database
  * Called by loadUserCredentials when cache misses
  */
-async function loadUserCredentialsFromDB(userId: string): Promise<Record<string, string>> {
+async function loadUserCredentialsFromDB(userId: string): Promise<Record<string, string | Record<string, string>>> {
   // Check in-memory cache (process-local, faster than Redis)
   const cached = globalForCredentials._credentialCache!.get(userId);
   if (cached && Date.now() - cached.timestamp < CREDENTIAL_CACHE_TTL) {
@@ -729,7 +729,7 @@ async function loadUserCredentialsFromDB(userId: string): Promise<Record<string,
   }
 
   try {
-    const credentialMap: Record<string, string> = {};
+    const credentialMap: Record<string, string | Record<string, string>> = {};
 
     // 1. Load OAuth tokens from accounts table (Twitter, YouTube, etc.)
     // Uses automatic token refresh for expired tokens
@@ -775,10 +775,25 @@ async function loadUserCredentialsFromDB(userId: string): Promise<Record<string,
       .where(eq(userCredentialsTable.userId, userId));
 
     for (const cred of credentials) {
+      const { decrypt } = await import('@/lib/encryption');
+
+      // Handle single-field credentials (backward compatible)
       if (cred.encryptedValue) {
-        const { decrypt } = await import('@/lib/encryption');
         const decryptedValue = await decrypt(cred.encryptedValue);
         credentialMap[cred.platform] = decryptedValue;
+      }
+
+      // Handle multi-field credentials (from metadata.fields)
+      if (cred.metadata && typeof cred.metadata === 'object' && 'fields' in cred.metadata) {
+        const fields = cred.metadata.fields as Record<string, string>;
+        const decryptedFields: Record<string, string> = {};
+
+        for (const [key, encryptedValue] of Object.entries(fields)) {
+          decryptedFields[key] = await decrypt(encryptedValue);
+        }
+
+        // Store as an object so {{user.platform.field}} works
+        credentialMap[cred.platform] = decryptedFields;
       }
     }
 
