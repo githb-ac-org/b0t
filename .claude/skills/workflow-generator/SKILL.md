@@ -433,6 +433,137 @@ grep -h "credential\." workflow/*.json | sort | uniq
 }
 ```
 
+### AI Agents (Autonomous Tool-Using AI)
+
+**When to use agents:** User wants AI to autonomously select and execute tools from the module registry.
+
+**List available agent tools:**
+```bash
+npm run list-agent-tools              # Built-in curated tools
+npm run list-agent-tools -- --category web
+npm run list-mcp-servers              # MCP (Model Context Protocol) servers
+npm run list-mcp-servers -- --category web
+npm run list-mcp-servers -- --no-credentials
+```
+
+**Built-in Tool Categories:**
+- `web` - Website scraping and content extraction (1 tool)
+- `ai` - Text and content generation (1 tool)
+- `communication` - Email and messaging (0 tools - coming soon)
+- `utilities` - Date/time, calculations (2 tools)
+
+**MCP Servers (12 total):**
+MCP servers provide access to external tools and services through the Model Context Protocol.
+Use `npm run list-mcp-servers` to see all available servers with their descriptions and required credentials.
+
+**Basic agent:**
+```json
+{
+  "module": "ai.ai-agent.runAgent",
+  "inputs": {
+    "options": {
+      "prompt": "{{trigger.userMessage}}",
+      "systemPrompt": "You are a helpful AI assistant with access to various tools.",
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "temperature": 0.7,
+      "maxSteps": 10,
+      "toolOptions": {
+        "useAll": true
+      }
+    }
+  },
+  "outputAs": "agentResponse"
+}
+// Access text: "{{agentResponse.text}}"
+```
+
+**Agent with conversation history (for chat workflows):**
+```json
+{
+  "trigger": {
+    "type": "chat",
+    "config": {
+      "inputVariable": "userMessage"
+    }
+  },
+  "config": {
+    "steps": [
+      {
+        "id": "agent",
+        "module": "ai.ai-agent.runAgent",
+        "inputs": {
+          "options": {
+            "prompt": "{{trigger.userMessage}}",
+            "conversationHistory": "{{trigger.conversationHistory}}",
+            "systemPrompt": "You are a helpful assistant.",
+            "model": "gpt-4o-mini",
+            "provider": "openai",
+            "maxSteps": 10,
+            "toolOptions": {
+              "useAll": true
+            }
+          }
+        },
+        "outputAs": "agentResponse"
+      }
+    ],
+    "returnValue": "{{agentResponse.text}}"
+  }
+}
+```
+
+**Agent with MCP tools (for advanced capabilities):**
+```json
+{
+  "id": "agent",
+  "module": "ai.ai-agent.runAgent",
+  "inputs": {
+    "options": {
+      "prompt": "{{trigger.userMessage}}",
+      "conversationHistory": "{{trigger.conversationHistory}}",
+      "systemPrompt": "You are a helpful assistant with access to web search and browser automation.",
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "maxSteps": 10,
+      "toolOptions": {
+        "useMCP": true,
+        "mcpServers": ["tavily-search", "brave-search", "fetch"]
+      }
+    }
+  },
+  "outputAs": "agentResponse"
+}
+```
+
+**IMPORTANT - MCP Server Setup:**
+Before using MCP servers, they must be running. The workflow executor automatically:
+1. Loads user credentials from the credentials page
+2. Injects credentials into MCP server environment variables
+3. Starts MCP servers when the agent needs them
+4. Cleans up MCP servers after workflow completes
+
+**Required credentials are auto-detected from `mcpServers` array.**
+
+**Agent parameters:**
+- `prompt` (required) - User's goal/request
+- `conversationHistory` (optional) - Pass `{{trigger.conversationHistory}}` for chat workflows
+- `toolOptions.useAll` (boolean) - Use all built-in curated tools
+- `toolOptions.categories` (array) - Filter by category: `["web", "ai", "communication"]`
+- `toolOptions.tools` (array) - Specific tools: `["fetchWebPage", "generateText"]`
+- `toolOptions.useMCP` (boolean) - Enable MCP (Model Context Protocol) servers
+- `toolOptions.mcpServers` (array) - MCP servers to use: `["tavily-search", "brave-search", "fetch"]`
+- `model` (string) - AI model (default: claude-haiku-4-5-20251001 - November 2025 cheap model)
+- `provider` (string) - "openai" or "anthropic" (auto-detected from model)
+- `temperature` (number) - 0-2 (default: 0.7)
+- `maxSteps` (number) - Max reasoning steps (default: 10)
+- `systemPrompt` (string) - System instructions for agent behavior
+
+**CRITICAL:** Agent workflows with chat trigger MUST:
+- Use `"inputs": { "options": { ... } }` wrapper
+- Include `"conversationHistory": "{{trigger.conversationHistory}}"` for memory
+- Return `"{{agentResponse.text}}"` for the chat response
+
 ## Key Rules
 
 **Variables:**

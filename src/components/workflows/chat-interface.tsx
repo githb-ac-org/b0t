@@ -31,6 +31,7 @@ export function ChatInterface({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [input, setInput] = useState('');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
 
   const toggleFullscreen = () => {
     const newFullscreen = !isFullscreen;
@@ -41,9 +42,18 @@ export function ChatInterface({
   const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: `/api/workflows/${workflowId}/chat`,
-      body: initialConversationId ? {
-        conversationId: initialConversationId,
-      } : undefined,
+      fetch: async (url, options) => {
+        const response = await fetch(url, options);
+
+        // Extract conversation ID from response headers
+        const newConversationId = response.headers.get('X-Conversation-Id');
+
+        if (newConversationId && !conversationId) {
+          setConversationId(newConversationId);
+        }
+
+        return response;
+      },
     }),
     messages: [
       {
@@ -130,10 +140,13 @@ export function ChatInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Maintain focus on input when status changes
+  // Maintain focus on input when status changes (during streaming and after response completes)
   useEffect(() => {
-    if (status === 'streaming' && inputRef.current && document.activeElement !== inputRef.current) {
-      inputRef.current.focus();
+    if (inputRef.current && document.activeElement !== inputRef.current) {
+      // Re-focus during streaming and when returning to ready state (after response completes)
+      if (status === 'streaming' || status === 'ready') {
+        inputRef.current.focus();
+      }
     }
   }, [status]);
 
@@ -141,7 +154,10 @@ export function ChatInterface({
     e.preventDefault();
     if (!input || !input.trim()) return;
 
-    sendMessage({ text: input });
+    sendMessage(
+      { text: input },
+      conversationId ? { body: { conversationId } } : undefined
+    );
     setInput(''); // Clear input after sending
   };
 

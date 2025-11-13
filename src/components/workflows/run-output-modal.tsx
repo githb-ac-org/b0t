@@ -146,7 +146,8 @@ export function RunOutputModal({
     // run.output is already the extracted array (new behavior after executor fix)
     console.log(`[RunOutputModal] returnValue configured and run.output is already extracted array[${run.output.length}]`);
     processedOutput = run.output;
-  } else if (returnValue) {
+  } else if (returnValue && run?.output) {
+    // Only log if there's actual output but it couldn't be applied
     console.log(`[RunOutputModal] returnValue configured but not applied:`, { returnValue, hasOutput: !!run?.output, isObject: typeof run?.output === 'object' });
   } else if (!returnValue && run?.output && typeof run.output === 'object' && !Array.isArray(run.output)) {
     // No returnValue specified - auto-filter internal variables

@@ -1,11 +1,9 @@
 ---
 name: workflow-builder
-description: "YOU MUST USE THIS SKILL when the user wants to CREATE or BUILD a NEW workflow automation. Activate for requests like: 'create a workflow', 'build a workflow', 'generate a workflow', 'make a workflow', 'I want to automate', 'automate X to Y', 'schedule a task', 'monitor X and send to Y'. This skill focuses on workflow creation, module discovery, and JSON generation. For DEBUGGING or FIXING existing workflows, use the workflow-fixer skill instead."
+description: "YOU MUST USE THIS SKILL when the user wants to CREATE or BUILD a NEW workflow automation. Activate for requests like: 'create a workflow', 'build a workflow', 'generate a workflow', 'make a workflow', 'I want to automate', 'automate X to Y', 'schedule a task', 'monitor X and send to Y'. This skill focuses on workflow creation, module discovery, and JSON generation."
 ---
 
 # Workflow Builder
-
-**For debugging**: Use `/fix-workflow`
 
 ## BEFORE YOU START
 
@@ -153,7 +151,7 @@ npx tsx scripts/import-workflow.ts workflow/{name}.json
   ```
 - Re-run validation after fixes
 
-**If errors persist**: Use `/fix-workflow` for debugging.
+**If errors persist**: Review the auto-fix output and manually correct remaining issues.
 
 ---
 
@@ -276,6 +274,40 @@ Access: `{{trigger.message}}`, `{{trigger.chatId}}`, `{{trigger.userId}}`
 
 ---
 
+## AI Agents (Autonomous Tools)
+
+**When to use:** User wants AI to autonomously select and execute tools instead of manually defining each step.
+
+**Available agents:**
+- `ai.ai-agent.runAgent` - General (choose categories)
+- `ai.ai-agent.runSocialAgent` - Social media (35 tools)
+- `ai.ai-agent.runCommunicationAgent` - Messaging (94 tools)
+- `ai.ai-agent.runDataAgent` - Data analysis (88 tools)
+
+**Example:**
+```json
+{
+  "id": "agent",
+  "module": "ai.ai-agent.runAgent",
+  "inputs": {
+    "prompt": "{{trigger.userMessage}}",
+    "toolOptions": {
+      "categories": ["social", "ai"]
+    }
+  },
+  "outputAs": "result"
+}
+```
+Access: `{{result.text}}`
+
+**Parameters:**
+- `prompt` (required) - User's goal
+- `toolOptions.categories` (array) - `["social", "ai", "data"]`
+- `model` (optional) - Default: claude-haiku-4-5-20251001 (November 2025 cheap model)
+- `temperature` (optional) - 0-2, default: 0.7
+
+---
+
 ## Quick Reference
 
 **Variable syntax:**
@@ -344,6 +376,6 @@ Access: `{{trigger.message}}`, `{{trigger.chatId}}`, `{{trigger.userId}}`
 **Variable undefined**: Check outputAs in previous steps
 **Credential error**: `grep "credential\." workflow/*.json` for exact names
 
-**For detailed debugging**: Use `/fix-workflow` command
+**For detailed debugging**: Review auto-fix output and validation errors
 
 **For complete examples**: Read `examples.md` (512 lines of annotated workflows)

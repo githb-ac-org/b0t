@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
-import { streamText } from 'ai';
+import { streamText, createUIMessageStream, createUIMessageStreamResponse } from 'ai';
 import { db } from '@/lib/db';
 import { workflowsTable, chatConversationsTable, chatMessagesTable } from '@/lib/schema';
 import { eq, and } from 'drizzle-orm';
@@ -142,9 +142,16 @@ export async function POST(
       ? JSON.parse(workflow.config)
       : workflow.config;
 
+    // Check if this is an agent workflow (uses ai-agent modules)
+    const isAgentWorkflow = config.steps?.some((step: { module: string }) =>
+      step.module?.startsWith('ai.ai-agent')
+    );
+
     // Extract model and provider from workflow config (if available in first step)
-    const workflowModel = config.steps?.[0]?.inputs?.model || CHAT_AI_MODEL;
-    const workflowProvider = config.steps?.[0]?.inputs?.provider || CHAT_AI_PROVIDER;
+    // For agent workflows, model is in inputs.options.model
+    const firstStepInputs = config.steps?.[0]?.inputs;
+    const workflowModel = firstStepInputs?.options?.model || firstStepInputs?.model || CHAT_AI_MODEL;
+    const workflowProvider = firstStepInputs?.options?.provider || firstStepInputs?.provider || CHAT_AI_PROVIDER;
 
     // Get the last user message - handle both content and parts format
     const lastMessage = messages[messages.length - 1];
@@ -161,9 +168,172 @@ export async function POST(
       userInput = textParts.join(' ');
     }
 
-    logger.info({ workflowId, messageCount: messages.length }, 'Starting chat stream');
+    logger.info({ workflowId, messageCount: messages.length, isAgentWorkflow }, 'Starting chat stream');
 
-    // System prompt for the AI
+    // For agent workflows, execute the workflow directly and return its response
+    if (isAgentWorkflow) {
+      try {
+        // Load conversation history from database
+        const historyMessages = await db
+          .select()
+          .from(chatMessagesTable)
+          .where(eq(chatMessagesTable.conversationId, conversation.id))
+          .orderBy(chatMessagesTable.createdAt)
+          .limit(20); // Last 20 messages
+
+        // Convert DB messages to AI SDK format
+        const conversationHistory = historyMessages.map((msg) => ({
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+        }));
+
+        // Inject conversation history into the agent's options
+        // Find the agent step and inject conversationHistory
+        const modifiedConfig = JSON.parse(JSON.stringify(config)); // Deep clone
+        for (const step of modifiedConfig.steps || []) {
+          if (step.module?.startsWith('ai.ai-agent')) {
+            // Inject conversationHistory into the agent's options
+            if (!step.inputs.options) {
+              step.inputs.options = {};
+            }
+            step.inputs.options.conversationHistory = conversationHistory;
+            logger.info(
+              {
+                workflowId,
+                conversationId: conversation.id,
+                historyLength: conversationHistory.length,
+              },
+              'Injected conversation history into agent'
+            );
+          }
+        }
+
+        // Execute the agent workflow with modified config
+        const workflowResult = await executeWorkflowConfig(modifiedConfig, workflow.userId, {
+          userMessage: userInput,
+        });
+
+        if (!workflowResult.success) {
+          throw new Error(workflowResult.error || 'Workflow execution failed');
+        }
+
+        // Extract the agent response and tool calls from workflow output
+        // The output structure is: { user: {...}, trigger: {...}, agentResponse: {...} }
+        const rawOutput = workflowResult.output as Record<string, unknown> | string;
+        let agentResponse: { text?: string; toolCalls?: Array<{ name: string; args: Record<string, unknown>; result: unknown }> } | undefined;
+
+        if (typeof rawOutput === 'object' && rawOutput !== null && 'agentResponse' in rawOutput) {
+          // Extract agentResponse from workflow context
+          agentResponse = rawOutput.agentResponse as { text?: string; toolCalls?: Array<{ name: string; args: Record<string, unknown>; result: unknown }> };
+        } else if (typeof rawOutput === 'string') {
+          // If it's already a string, use it directly
+          agentResponse = { text: rawOutput };
+        } else {
+          // Fallback: treat entire output as agent response
+          agentResponse = rawOutput as { text?: string; toolCalls?: Array<{ name: string; args: Record<string, unknown>; result: unknown }> };
+        }
+
+        const agentText = agentResponse?.text || '';
+        const toolCalls = agentResponse?.toolCalls || [];
+
+        // If there's no text but there are tool calls, it means the agent made tool calls
+        // but hasn't generated the final response yet (shouldn't happen with maxSteps > 1)
+        if (!agentText && toolCalls.length > 0) {
+          logger.warn({ workflowId, toolCalls }, 'Agent completed with tool calls but no text');
+        }
+
+        // Save messages to database
+        await db.insert(chatMessagesTable).values([
+          {
+            id: nanoid(),
+            conversationId: conversation.id,
+            role: 'user',
+            content: userInput,
+          },
+          {
+            id: nanoid(),
+            conversationId: conversation.id,
+            role: 'assistant',
+            content: agentText,
+          },
+        ]);
+
+        // Update conversation
+        let title = conversation.title;
+        if (!title && userInput) {
+          title = userInput.slice(0, 100);
+        }
+
+        await db
+          .update(chatConversationsTable)
+          .set({
+            messageCount: conversation.messageCount + 2,
+            title,
+            updatedAt: new Date(),
+          })
+          .where(eq(chatConversationsTable.id, conversation.id));
+
+        logger.info({ workflowId, toolCallCount: toolCalls.length }, 'Agent workflow executed successfully');
+
+        // Return agent response with tool call metadata
+        logger.info({ workflowId, agentText, toolCallCount: toolCalls.length }, 'Returning agent response');
+
+        // If no text was generated, return an error message
+        const finalText = agentText || 'I apologize, but I encountered an issue and could not generate a response.';
+
+        // Create a UI message stream manually with the agent's response
+        const stream = createUIMessageStream({
+          execute: async ({ writer }) => {
+            const textId = 'agent-response';
+            // Write the agent's text as the message content
+            writer.write({ type: 'text-start', id: textId });
+            writer.write({ type: 'text-delta', id: textId, delta: finalText });
+            writer.write({ type: 'text-end', id: textId });
+            writer.write({ type: 'finish' });
+          },
+        });
+
+        const response = createUIMessageStreamResponse({ stream });
+        // Add conversation ID to response headers
+        response.headers.set('X-Conversation-Id', conversation.id);
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        logger.error({ workflowId, error: errorMessage }, 'Agent workflow execution failed');
+
+        // Save error message to database
+        await db.insert(chatMessagesTable).values([
+          {
+            id: nanoid(),
+            conversationId: conversation.id,
+            role: 'user',
+            content: userInput,
+          },
+          {
+            id: nanoid(),
+            conversationId: conversation.id,
+            role: 'assistant',
+            content: `I encountered an error: ${errorMessage}`,
+          },
+        ]);
+
+        return new Response(
+          JSON.stringify({
+            role: 'assistant',
+            content: `I encountered an error: ${errorMessage}`,
+            error: errorMessage,
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            status: 500,
+          }
+        );
+      }
+    }
+
+    // System prompt for non-agent workflows
     const systemPrompt = `You are a helpful AI assistant that executes workflows based on user input.
 
 Workflow: ${workflow.name}
